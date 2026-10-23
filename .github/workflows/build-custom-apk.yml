@@ -122,6 +122,13 @@ jobs:
       - name: Install matching Android SDK, Build Tools and NDK
         run: |
           set -euo pipefail
+          # Hosted runners may have unaccepted SDK package licenses.
+          # Use a finite response file, not yes | sdkmanager (SIGPIPE under pipefail).
+          printf 'y\n%.0s' {1..100} > "$RUNNER_TEMP/sdk-license-answers"
+          if ! sdkmanager --licenses < "$RUNNER_TEMP/sdk-license-answers" > "$RUNNER_TEMP/sdk-licenses.log" 2>&1; then
+            tail -n 25 "$RUNNER_TEMP/sdk-licenses.log"
+            exit 1
+          fi
           sdkmanager "platforms;${{ steps.toolchain.outputs.androidPlatform }}" \
                      "build-tools;${{ steps.toolchain.outputs.buildTools }}" \
                      "ndk;${{ steps.toolchain.outputs.ndk }}"
