@@ -143,6 +143,13 @@ jobs:
           python3 tools/prepare-runtime-descriptor.py --write
           python3 tools/prepare-runtime-descriptor.py --check
 
+      - name: Pin reviewed Google Maven Linux AAPT2 artifact
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          python3 scripts/pin_linux_aapt2.py "$SOURCE"
+
       - name: Compile real Standard Debug APK (no original signing key)
         env:
           SOURCE: ${{ steps.source.outputs.source }}
