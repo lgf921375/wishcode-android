@@ -39,8 +39,15 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Use preinstalled Android SDK (do not request retired SDK tools)
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?GitHub runner does not provide ANDROID_HOME}"
+          test -d "$ANDROID_HOME/cmdline-tools"
+          command -v sdkmanager
+          sdkmanager --version
+          echo "SDK_DIR=$ANDROID_HOME" >> "$GITHUB_ENV"
 
       - name: Download pinned full DSHA source and offline runtime archive
         env:
