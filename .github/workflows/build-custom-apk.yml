@@ -1,0 +1,164 @@
+name: WishCode V0.3 Android APK - Manual
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: wishcode-v03-manual
+  cancel-in-progress: false
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout independent WishCode build scripts
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test WishCode patch logic (does not compile APK)
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts -p 'test_customize.py' -v
+          python3 -m py_compile scripts/customize.py
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Download pinned full DSHA source and offline runtime archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download v0.2.1-rc.2 --repo DSH-APP/DSHA \
+            --pattern 'DSHA-0.2.1-rc.2-20261022.2100-source.zip' \
+            --dir .
+
+      - name: Verify SHA-256 and extract source safely
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib, os, stat, zipfile
+          archive = Path('DSHA-0.2.1-rc.2-20261022.2100-source.zip')
+          expected = 'ef134fe8713bfa4d6cf3bdea883be1591246d4b78ace16bd924f6d739188425a'
+          with archive.open('rb') as handle:
+              actual = hashlib.file_digest(handle, 'sha256').hexdigest()
+          if actual != expected:
+              raise SystemExit('STOP: upstream source ZIP SHA-256 mismatch: ' + actual)
+          out = Path('upstream-source')
+          out.mkdir()
+          with zipfile.ZipFile(archive) as z:
+              for info in z.infolist():
+                  path = PurePosixPath(info.filename)
+                  if path.is_absolute() or '..' in path.parts or '\\' in info.filename or ':' in info.filename:
+                      raise SystemExit('STOP: unsafe archive path')
+                  if stat.S_IFMT(info.external_attr >> 16) == stat.S_IFLNK:
+                      raise SystemExit('STOP: source ZIP contains symlinks')
+              z.extractall(out)
+          matches = [p.parent.parent.resolve() for p in out.rglob('app/build.gradle') if p.is_file()]
+          if len(matches) != 1:
+              raise SystemExit('STOP: source archive has unexpected Android project layout')
+          src = matches[0]
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as f:
+              f.write('source=' + str(src) + '\n')
+          print('Pinned source extracted:', src)
+          PY
+
+      - name: Apply WishCode V0.3 adaptation
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          python3 scripts/customize.py "$SOURCE" \
+            --template scripts/WishCodeHomeActivity.java \
+            --report "$SOURCE/wishcode-patch-report.json"
+
+      - name: Resolve tool versions from exact upstream source
+        id: toolchain
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          cd "$SOURCE"
+          python3 tools/ci-toolchain.py --github-output
+
+      - name: Install matching Android SDK, Build Tools and NDK
+        run: |
+          set -euo pipefail
+          sdkmanager "platforms;${{ steps.toolchain.outputs.androidPlatform }}" \
+                     "build-tools;${{ steps.toolchain.outputs.buildTools }}" \
+                     "ndk;${{ steps.toolchain.outputs.ndk }}"
+
+      - name: Recompute and verify upstream managed runtime descriptor
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          cd "$SOURCE"
+          python3 tools/prepare-backup-assets.py --check
+          python3 tools/prepare-runtime-descriptor.py --write
+          python3 tools/prepare-runtime-descriptor.py --check
+
+      - name: Compile real Standard Debug APK (no original signing key)
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          cd "$SOURCE"
+          chmod +x gradlew
+          bash build.sh :app:assembleStandardDebug
+
+      - name: Verify APK signature and independent Android package ID
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+          BUILD_TOOLS: ${{ steps.toolchain.outputs.buildTools }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SOURCE"
+          test -n "$BUILD_TOOLS"
+          mkdir -p dist
+          count=$(find "$SOURCE/app/build/outputs/apk" \
+             -path '*/standard/debug/*' -name '*.apk' -type f | wc -l)
+          if [ "$count" -ne 1 ]; then
+            echo "STOP: expected exactly one compiled Standard Debug APK"; exit 1
+          fi
+          apk=$(find "$SOURCE/app/build/outputs/apk" \
+             -path '*/standard/debug/*' -name '*.apk' -type f | head -1)
+          cp "$apk" dist/WishCode-v0.3-arm64-debug.apk
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
+             --verbose dist/WishCode-v0.3-arm64-debug.apk
+          package=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
+             dist/WishCode-v0.3-arm64-debug.apk | sed -n \
+             "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
+          test "$package" = "app.wishcode.harnessmobile"
+          unzip -t dist/WishCode-v0.3-arm64-debug.apk >/dev/null
+          sha256sum dist/WishCode-v0.3-arm64-debug.apk > dist/SHA256SUMS.txt
+          cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
+
+      - name: Upload verified, signed test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WishCode-V0.3-Android-APK
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
