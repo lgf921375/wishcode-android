@@ -25,8 +25,8 @@ jobs:
       - name: Test WishCode patch logic (does not compile APK)
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s scripts -p 'test_customize.py' -v
-          python3 -m py_compile scripts/customize.py
+          python3 -m unittest discover -s scripts -p 'test_*.py' -v
+          python3 -m py_compile scripts/customize.py scripts/pin_linux_aapt2.py
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
