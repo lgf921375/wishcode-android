@@ -39,15 +39,26 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Use preinstalled Android SDK (do not request retired SDK tools)
+      - name: Locate Android SDK from runner installation
         shell: bash
         run: |
           set -euo pipefail
-          : "${ANDROID_HOME:?GitHub runner does not provide ANDROID_HOME}"
-          test -d "$ANDROID_HOME/cmdline-tools"
-          command -v sdkmanager
-          sdkmanager --version
-          echo "SDK_DIR=$ANDROID_HOME" >> "$GITHUB_ENV"
+          # Proven by the first Actions run's sdkmanager log.
+          SDK_ROOT="/usr/local/lib/android/sdk"
+          test -d "$SDK_ROOT/cmdline-tools" || {
+            echo "STOP: expected runner Android SDK directory not found"; exit 1;
+          }
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/16.0/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          test -x "$SDKMANAGER" || {
+            echo "STOP: SDK command line tools unavailable"; exit 1;
+          }
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "${SDKMANAGER%/sdkmanager}" >> "$GITHUB_PATH"
+          "$SDKMANAGER" --version
 
       - name: Download pinned full DSHA source and offline runtime archive
         env:
