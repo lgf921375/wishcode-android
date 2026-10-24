@@ -38,7 +38,8 @@ public final class WishCodePreviewEntry {
       return;
     }
     host.startActivity(new Intent(host, WishCodePreviewActivity.class)
-        .putExtra("chat_port", chatPort).putExtra("candidate", candidate));
+        .putExtra("chat_port", chatPort).putExtra("candidate", candidate)
+        .putExtra("from_chat_link", candidate != null));
   }
 
 }
