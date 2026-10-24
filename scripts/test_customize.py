@@ -115,7 +115,7 @@ class PatchTests(unittest.TestCase):
             root = Path(d)
             fixture(root)
             patch.modify(root, HOME)
-            self.assertIn('applicationId "app.wishcode.harnessmobile"',
+            self.assertIn('applicationId "app.wishcode.harnessmobile.v04"',
                           (root / "app/build.gradle").read_text())
 
 
