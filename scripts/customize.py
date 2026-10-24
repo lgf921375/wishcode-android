@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 BASE = "DSH-APP/DSHA@c750348a4d4b18edcb165a93b4ca66403b040b4c"
-APP_ID = "app.wishcode.harnessmobile.v04"
+APP_ID = "app.wishcode.harnessmobile.v05preview"
 HOME_PATH = "app/src/main/java/com/deepseekharness/app/ui/WishCodeHomeActivity.java"
 MOBILE_PATH = "app/src/main/assets/web-integration/wishcode-mobile.js"
 MAIN_MANIFEST = '''        <activity
@@ -23,7 +23,11 @@ MAIN_MANIFEST = '''        <activity
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>'''
-NEW_MANIFEST = '''        <activity
+NEW_MANIFEST = '''        <activity android:name=".ui.WishCodePreviewActivity"
+            android:exported="false" android:process=":wishcode_preview"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -36,8 +40,28 @@ NEW_MANIFEST = '''        <activity
         </activity>'''
 
 EXPECTED = {
+    "app/src/main/java/com/deepseekharness/app/DshaApp.java": [
+        ('    super.onCreate();',
+         '    super.onCreate();\n'
+         '    if (android.app.Application.getProcessName().endsWith(":wishcode_preview")) {\n'
+         '      android.webkit.WebView.setDataDirectorySuffix("wishcode_developer_preview");\n'
+         '      return; // 不初始化工作台、桥、备份或运行时服务。\n'
+         '    }'),
+    ],
+    "app/src/main/java/com/deepseekharness/app/ui/WebPreviewActivity.java": [
+        ('    WebFullscreenUi.install(this);',
+         '    WishCodePreviewEntry.install(this);\n    WebFullscreenUi.install(this);'),
+        ('      if (request.hasGesture()\n',
+         '      if (request.hasGesture() && com.deepseekharness.app.util.WishCodePreviewPolicy.normalize(url,\n'
+         '          com.deepseekharness.app.util.WishCodePreviewPolicy.port(baseUrl)) != null) {\n'
+         '        WishCodePreviewEntry.open(WebPreviewActivity.this, url); return true;\n'
+         '      }\n      if (request.hasGesture()\n'),
+    ],
     "app/build.gradle": [
         ('applicationId "dsh.android.client"', f'applicationId "{APP_ID}"'),
+        ('versionCode 190', 'versionCode 191'),
+        ('versionName "0.2.1-rc.2-20261022.2100-dsh0.2.1-rc.2"',
+         'versionName "0.5-preview-001-dsh0.2.1-rc.2"'),
     ],
     "app/src/main/res/values/strings.xml": [
         ('<string name="app_name" translatable="false">DSHA</string>',
@@ -144,6 +168,19 @@ def modify(root: Path, home_template: str) -> dict:
     if "wishcode-mobile-v04" not in mobile_template or "data-composer-input" not in mobile_template:
         raise RuntimeError("STOP: unexpected mobile stylesheet asset")
 
+    for name, package in [("WishCodePreviewActivity", "ui"),
+                          ("WishCodePreviewEntry", "ui"), ("WishCodePreviewPolicy", "util"),
+                          ("WishCodePreviewHttp", "util")]:
+        relative = f"app/src/main/java/com/deepseekharness/app/{package}/{name}.java"
+        path = root / relative
+        if path.exists():
+            raise RuntimeError(f"STOP: preview source already exists: {relative}")
+        source = Path(__file__).with_name(name + ".java").read_text(encoding="utf-8")
+        if f"public final class {name}" not in source:
+            raise RuntimeError(f"STOP: unexpected preview source: {name}")
+        pending[path] = source
+        changes.append({"path": relative, "before": None, "after": sha(source)})
+
     store = pending[root / "app/src/main/java/com/deepseekharness/app/core/ConfigStore.java"]
     if 'return flag(Constants.KEY_CONFIRM_SHELL, true);' not in store:
         raise RuntimeError("STOP: original Shell approval must remain enabled")
@@ -157,6 +194,7 @@ def modify(root: Path, home_template: str) -> dict:
         raise RuntimeError("STOP: original ARM64 filter missing")
 
     for path, new in pending.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(new, encoding="utf-8", newline="")
     home.parent.mkdir(parents=True, exist_ok=True)
     home.write_text(home_template, encoding="utf-8", newline="")

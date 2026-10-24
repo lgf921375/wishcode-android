@@ -1,3 +1,20 @@
+# 许愿编程 V0.5 · APP 内 HTML 预览候选
+
+**2026-10-24：源码及主机测试已完成，APK 构建待明确授权，Android / ColorOS 真机未验。**
+
+- 聊天页新增「预览网页 / 文件工具」；支持用户确认本机 URL 后在 APP 内交互、返回聊天修改、手动刷新。
+- 独立浏览器资料目录，不将 DSH 鉴权 Cookie 交给开发页面。首版支持本地静态 HTML/CSS/JS；跨站 CDN、WebSocket、POST/上传暂不支持。
+- 保留 ColorOS 拼音字体，新增控件按系统字体度量排版；实际效果待实机检查。
+- 新候选包 `app.wishcode.harnessmobile.v05preview` 与旧 V0.4 并存，不要求卸载旧版；测试版不自动继承旧数据。
+- 24 项主机测试通过，含 Java URL/HTTP 的 45 个行为断言。不是 APK 编译或手机验收证明。
+- 工作流 **仅手动**。获得一次构建授权后，在固定分支/SHA 发起一次；失败不自动重跑。
+
+[完整实现、证据、限制与真机步骤](docs/preview-001-handoff.md) · [Issue #2](https://github.com/lgf921375/wishcode-android/issues/2)
+
+以下为 V0.4 历史记录，历史状态与下载说明不代表当前候选构建结果。
+
+---
+
 # WishCode Android · 许愿编程 V0.4
 
 基于 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA/releases/tag/v0.2.1-rc.2) 固定版本定制的安卓本地 DeepSeek Harness。目标是简化模型配置和插件管理；**DeepSeek API Key 请只在手机应用中输入**。
