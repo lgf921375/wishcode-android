@@ -169,7 +169,8 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
   private void showFreeModelNotice() {
     new AlertDialog.Builder(this)
         .setTitle("免费模型不是无限免费")
-        .setMessage("Kilo 网关提供无需 API Key 的免费模型，但匿名请求按 IP 限流（官方文档为每小时最多 200 次），并可能存在地区限制。\n\n"
+        .setMessage("免费模型通过网络调用，不是下载到手机。\n\n"
+            + "Kilo 网关提供无需 API Key 的免费模型，但匿名请求按 IP 限流（官方文档为每小时最多 200 次），并可能存在地区限制。\n\n"
             + "OpenCode 的部分模型为限时免费，且官方对第三方客户端的免费访问有限制，不能保证一直可用。\n\n"
             + "这个插件来自独立开源作者，包含额外的账号渠道、公告、升级与网关功能，尚未完成全面安全审计。"
             + "部分免费服务商可能记录输入或用于改进模型。\n\n"
