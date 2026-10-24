@@ -41,8 +41,11 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     label.setText(value);
     label.setTextSize(sp);
     label.setTextColor(getColor(color));
-    label.setTypeface(Typeface.create("sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL));
+    // Keep the user-selected ColorOS font, including its pinyin glyphs.
+    if (bold) label.setTypeface(label.getTypeface(), Typeface.BOLD);
     label.setIncludeFontPadding(true);
+    label.setFallbackLineSpacing(true);
+    label.setLineSpacing(dp(7), 1.12f);
     label.setBreakStrategy(android.text.Layout.BREAK_STRATEGY_HIGH_QUALITY);
     label.setGravity(Gravity.START);
     return label;
@@ -63,8 +66,14 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     button.setTextSize(16);
     button.setAllCaps(false);
     button.setGravity(Gravity.CENTER);
-    button.setMinHeight(dp(52));
-    button.setPadding(dp(12), dp(9), dp(12), dp(9));
+    // WRAP_CONTENT plus comfortable vertical font metrics: never fix button height.
+    button.setMinHeight(dp(64));
+    button.setIncludeFontPadding(true);
+    button.setFallbackLineSpacing(true);
+    button.setSingleLine(false);
+    button.setMaxLines(4);
+    button.setLineSpacing(dp(7), 1.12f);
+    button.setPadding(dp(12), dp(14), dp(12), dp(14));
     button.setBackgroundResource(
         primary ? R.drawable.bg_btn_primary : R.drawable.bg_action_plain);
     button.setTextColor(getColorStateList(
@@ -73,7 +82,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     LinearLayout.LayoutParams p =
         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
-    p.topMargin = dp(10);
+    p.topMargin = dp(12);
     parent.addView(button, p);
   }
 
