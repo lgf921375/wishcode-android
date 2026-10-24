@@ -165,7 +165,10 @@
     if (!root || root.nodeType !== 1) return;
     if (root.matches('a[href]')) decorate(root);
     if (root.querySelectorAll) {
-      root.querySelectorAll('[data-chat-flow] a[href]').forEach(decorate);
+      // React usually inserts a <p> inside an existing flow container; its
+      // [data-chat-flow] ancestor then lies outside this mutation subtree.
+      const scope = root.closest('[data-chat-flow]');
+      root.querySelectorAll(scope ? 'a[href]' : '[data-chat-flow] a[href]').forEach(decorate);
     }
   }
   function connectPreviewCards() {
