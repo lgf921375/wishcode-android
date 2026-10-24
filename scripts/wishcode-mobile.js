@@ -59,7 +59,7 @@
     '    border-radius: 12px; max-width: 100%; box-sizing: border-box;',
     '  }',
     '  .wishcode-local-artifact-label {',
-    '    font-size: 13px; line-height: 1.8; overflow-wrap: break-word;',
+    '    line-height: 1.8; overflow-wrap: break-word;',
     '    flex: 1 1 120px; min-width: 0;',
     '  }',
     '  a.wishcode-local-artifact-open {',
