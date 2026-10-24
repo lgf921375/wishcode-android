@@ -144,7 +144,7 @@ EXPECTED = {
          '              && !controller.isStarting() && !controller.isStopping()\n'
          '              && !controller.isRestoringWebSession()\n'
          '              && !controller.hasUnresolvedWebSession()\n'
-         '              && !controller.isUserStopped()\n'
+         '              && controller.canAutoRestart()\n'
          '              && !com.deepseekharness.app.core.EnvironmentAccess.needsRecovery(controller)\n'
          '              && !controller.config().isStartupRecoveryRequested()) {\n'
          '            // Exactly one user-initiated launcher start; never auto-retry after failure.\n'
