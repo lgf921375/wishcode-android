@@ -1,0 +1,13 @@
+✔ official routes remain separate and forced thinking is serialized (1.392039ms)
+✔ UTF-8 reasoning, text, interleaved tool fragments and cached usage assemble (9.494149ms)
+✔ truncation, malformed tool JSON and provider errors never finish successfully (1.167461ms)
+✔ single POST, no redirect or billing fallback; HTTP body not exposed (2.538879ms)
+✔ caller abort reaches transport and successful streams finish (1.082372ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 93.063456

@@ -39,6 +39,9 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Test GLM streaming protocol (no API requests)
+        run: node --test tests/glm.test.mjs
+
       - name: Locate Android SDK from runner installation
         shell: bash
         run: |
@@ -110,6 +113,7 @@ jobs:
           python3 scripts/customize.py "$SOURCE" \
             --template scripts/WishCodeHomeActivity.java \
             --report "$SOURCE/wishcode-patch-report.json"
+          python3 scripts/install_glm.py "$SOURCE"
 
       - name: Resolve tool versions from exact upstream source
         id: toolchain

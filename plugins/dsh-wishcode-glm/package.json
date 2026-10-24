@@ -1,0 +1,1 @@
+{"name":"dsh-wishcode-glm","version":"0.1.0","type":"module","main":"lib/index.js","exports":{".":"./lib/index.js"},"cordis":{"entry":"lib/index.js"},"dsh":{"bundle":{"patch":"./cordis.patch.yml"}},"peerDependencies":{"@deepseek-ai/dsh-llm":"0.2.1-rc.2"},"license":"MIT"}

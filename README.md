@@ -1,3 +1,5 @@
+> GLM-5.3 API / Coding Plan 源码已接入，尚待单独授权编译及真机验收。已成功构建的 #7 预览 APK 不含 GLM。详见 [GLM 交付记录](docs/glm53-handoff.md)。
+
 # 许愿编程 V0.5 · APP 内 HTML 预览候选
 
 **2026-10-24：源码及主机测试已完成，APK 构建待明确授权，Android / ColorOS 真机未验。**

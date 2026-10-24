@@ -23,7 +23,7 @@ import com.deepseekharness.app.R;
 /**
  * WishCode phone-first launcher. The existing DSH engine, account storage,
  * tools and permission prompts stay in their original upstream components.
- * No API keys, prompts, passwords or web cookies pass through this Activity.
+ * GLM credentials are edited by a dedicated native dialog, never the chat WebView.
  */
 public final class WishCodeHomeActivity extends AppCompatActivity {
   // Reviewed exact GitHub release artifact; never install the unrelated npm namesake.
@@ -118,6 +118,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
 
     addText(content, text("模型", 19, R.color.text, true), 0, 0);
     action(content, "选择模型 · 官方 DeepSeek / 免费模型", false, this::showModelChoice);
+    action(content, "GLM-5.3 · API / 套餐设置", false, () -> WishCodeGlmSettings.show(this));
 
     addText(content, text("工具", 19, R.color.text, true), 22, 0);
     action(content, "预览网页 · HTML 实时交互", false,

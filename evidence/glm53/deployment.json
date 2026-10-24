@@ -1,0 +1,31 @@
+{
+  "upstream": "c750348a4d4b18edcb165a93b4ca66403b040b4c",
+  "registry_generation": "passed",
+  "runtime_input_contract": "passed",
+  "installed_files": [
+    {
+      "asset": "builtin-plugins/dsh-wishcode-glm/cordis.patch.yml",
+      "target": "root/dsha-wishcode-glm/cordis.patch.yml",
+      "executable": false
+    },
+    {
+      "asset": "builtin-plugins/dsh-wishcode-glm/lib/index.js",
+      "target": "root/dsha-wishcode-glm/lib/index.js",
+      "executable": false
+    },
+    {
+      "asset": "builtin-plugins/dsh-wishcode-glm/lib/protocol.js",
+      "target": "root/dsha-wishcode-glm/lib/protocol.js",
+      "executable": false
+    },
+    {
+      "asset": "builtin-plugins/dsh-wishcode-glm/package.json",
+      "target": "root/dsha-wishcode-glm/package.json",
+      "executable": false
+    }
+  ],
+  "full_runtime_descriptor": "blocked locally: source checkout omits glibc-python.tar.gz; workflow uses pinned full source release",
+  "android_compile": "not run for GLM changes",
+  "device_test": "not run",
+  "live_api_test": "not run; no credentials supplied"
+}
