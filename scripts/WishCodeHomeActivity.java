@@ -32,6 +32,13 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
   private static final String FREE_MODEL_SHA =
       "3c98427d8144041568c12dd5c61c42632d022856e8f5327e66b813fe80d269a2";
 
+  // Optional read-only GitHub search tools; official GitHub Release archive checksum.
+  // The current Harness 0.2.1-rc.2 compatibility is not yet verified.
+  private static final String GITHUB_PLUGIN_URL =
+      "https://github.com/moxingovo/dsh-github/releases/download/v0.1.6/dsh-plugin-github-0.1.6.tgz";
+  private static final String GITHUB_PLUGIN_SHA =
+      "cb76ddc1fd02d71dea02bfede0ecc9137877ef1b5c31ac8ca011fe9b1dcf5db3";
+
   private int dp(int size) {
     return Math.round(size * getResources().getDisplayMetrics().density);
   }
@@ -115,6 +122,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     addText(content, text("工具", 19, R.color.text, true), 22, 0);
     action(content, "项目文件", false,
         () -> startActivity(new Intent(this, WorkspaceFilesActivity.class)));
+    action(content, "GitHub 搜索与源码研究", false, this::showGitHubHelp);
     action(content, "插件管理", false, this::openPlugins);
     action(content, "终端命令", false, this::openTerminal);
 
@@ -200,6 +208,34 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
         .appendQueryParameter("version", "2.5.9")
         .build();
     // PluginInstallActivity performs its own inspection and explicit confirmation.
+    startActivity(new Intent(this, PluginInstallActivity.class).setData(uri));
+  }
+
+  private void showGitHubHelp() {
+    new AlertDialog.Builder(this)
+        .setTitle("GitHub 源码研究")
+        .setMessage("手机的 Ubuntu 已包含 git。可以在已授权的测试工作区克隆公开仓库，"
+            + "再让 Harness 阅读 README、代码和测试。克隆不需要单独的 GitHub 插件。\n\n"
+            + "可选 dsh-plugin-github 为 Agent 增加 github_search 与 github_get 工具，"
+            + "用来搜索仓库、Issue/PR、读取单个文件；它不提供克隆、推送或写入操作。"
+            + "公开检索默认可匿名使用，但有限流。\n\n"
+            + "插件是第三方只读扩展，尚未在本机 DSH 0.2.1-rc.2 上验证兼容性。"
+            + "检查来源和安装预览后再决定，勿提供具有写权限的 GitHub Token。")
+        .setPositiveButton("检查 GitHub 插件", (dialog, which) -> openGithubPluginInstaller())
+        .setNeutralButton("打开终端（Git 克隆）", (dialog, which) -> openTerminal())
+        .setNegativeButton("取消", null)
+        .show();
+  }
+
+  private void openGithubPluginInstaller() {
+    Uri uri = new Uri.Builder()
+        .scheme("dsha")
+        .authority("install")
+        .appendQueryParameter("url", GITHUB_PLUGIN_URL)
+        .appendQueryParameter("sha256", GITHUB_PLUGIN_SHA)
+        .appendQueryParameter("name", "dsh-plugin-github")
+        .appendQueryParameter("version", "0.1.6")
+        .build();
     startActivity(new Intent(this, PluginInstallActivity.class).setData(uri));
   }
 
