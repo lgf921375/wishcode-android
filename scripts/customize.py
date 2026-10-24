@@ -13,6 +13,7 @@ from pathlib import Path
 BASE = "DSH-APP/DSHA@c750348a4d4b18edcb165a93b4ca66403b040b4c"
 APP_ID = "app.wishcode.harnessmobile"
 HOME_PATH = "app/src/main/java/com/deepseekharness/app/ui/WishCodeHomeActivity.java"
+MOBILE_PATH = "app/src/main/assets/web-integration/wishcode-mobile.js"
 MAIN_MANIFEST = '''        <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -56,6 +57,14 @@ EXPECTED = {
     "app/src/main/java/com/deepseekharness/app/ui/OnboardingUi.java": [
         ('TextView brand = text("DSHA", 18, R.color.text);',
          'TextView brand = text("许愿编程", 18, R.color.text);'),
+    ],
+    "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java": [
+        ('''        + read(context, "web-integration/page.js")
+        + "\nwindow.__dshaNativePresentation.install("''',
+         '''        + read(context, "web-integration/page.js")
+        + "\n"
+        + read(context, "web-integration/wishcode-mobile.js")
+        + "\nwindow.__dshaNativePresentation.install("'''),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/LaunchFragment.java": [
         ('''    start.setOnClickListener(
@@ -113,6 +122,12 @@ def modify(root: Path, home_template: str) -> dict:
         raise RuntimeError("STOP: home activity already exists, refusing to overwrite")
     if "public final class WishCodeHomeActivity extends AppCompatActivity" not in home_template:
         raise RuntimeError("STOP: unexpected home template")
+    mobile = root / MOBILE_PATH
+    if mobile.exists():
+        raise RuntimeError("STOP: mobile stylesheet asset already exists")
+    mobile_template = Path(__file__).with_name("wishcode-mobile.js").read_text(encoding="utf-8")
+    if "wishcode-mobile-v04" not in mobile_template or "data-composer-input" not in mobile_template:
+        raise RuntimeError("STOP: unexpected mobile stylesheet asset")
 
     store = pending[root / "app/src/main/java/com/deepseekharness/app/core/ConfigStore.java"]
     if 'return flag(Constants.KEY_CONFIRM_SHELL, true);' not in store:
@@ -131,6 +146,9 @@ def modify(root: Path, home_template: str) -> dict:
     home.parent.mkdir(parents=True, exist_ok=True)
     home.write_text(home_template, encoding="utf-8", newline="")
     changes.append({"path": HOME_PATH, "before": None, "after": sha(home_template)})
+    mobile.parent.mkdir(parents=True, exist_ok=True)
+    mobile.write_text(mobile_template, encoding="utf-8", newline="")
+    changes.append({"path": MOBILE_PATH, "before": None, "after": sha(mobile_template)})
     return {"base": BASE, "application_id": APP_ID,
             "android_apk_built": False, "compatibility_verified": False,
             "changes": changes}
