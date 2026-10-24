@@ -1,4 +1,4 @@
-name: WishCode V0.5 Preview Android APK - Manual
+name: WishCode V0.5 Preview 002 Android APK - Manual
 on:
   workflow_dispatch:
 permissions:
@@ -187,22 +187,22 @@ jobs:
           fi
           apk=$(find "$SOURCE/app/build/outputs/apk" \
              -path '*/standard/debug/*' -name '*.apk' -type f | head -1)
-          cp "$apk" dist/WishCode-v0.5-preview-arm64-debug.apk
+          cp "$apk" dist/WishCode-v0.5-preview-002-arm64-debug.apk
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
-             --verbose --print-certs dist/WishCode-v0.5-preview-arm64-debug.apk | tee dist/signature-report.txt
+             --verbose --print-certs dist/WishCode-v0.5-preview-002-arm64-debug.apk | tee dist/signature-report.txt
           package=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
-             dist/WishCode-v0.5-preview-arm64-debug.apk | sed -n \
+             dist/WishCode-v0.5-preview-002-arm64-debug.apk | sed -n \
              "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
-          test "$package" = "app.wishcode.harnessmobile.v05preview"
-          unzip -t dist/WishCode-v0.5-preview-arm64-debug.apk >/dev/null
-          sha256sum dist/WishCode-v0.5-preview-arm64-debug.apk > dist/SHA256SUMS.txt
+          test "$package" = "app.wishcode.harnessmobile.v05trial2"
+          unzip -t dist/WishCode-v0.5-preview-002-arm64-debug.apk >/dev/null
+          sha256sum dist/WishCode-v0.5-preview-002-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
           git rev-parse HEAD > dist/source-commit.txt
 
       - name: Upload verified, signed test APK
         uses: actions/upload-artifact@v4
         with:
-          name: WishCode-V0.5-Preview-Android-APK
+          name: WishCode-V0.5-Preview-002-Android-APK
           path: dist/
           if-no-files-found: error
           retention-days: 7
