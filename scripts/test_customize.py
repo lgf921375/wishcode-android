@@ -99,7 +99,7 @@ class PatchTests(unittest.TestCase):
         js = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
         self.assertIn("max-width: 760px", js)
         self.assertIn("data-mobile-nav", js)
-        self.assertIn("role=\\\"dialog\\\"", js)
+        self.assertIn('role="dialog"', js)
         self.assertIn("data-composer-input", js)
         self.assertIn("window.top !== window", js)
         self.assertNotIn("fetch(", js)
@@ -121,6 +121,19 @@ class PatchTests(unittest.TestCase):
         self.assertIn('button.setFallbackLineSpacing(true)', HOME)
         self.assertIn('button.setLineSpacing(', HOME)
         self.assertIn('LayoutParams.WRAP_CONTENT', HOME)
+
+    def test_onboarding_preserves_pinyin_metrics(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            fixture(root)
+            patch.modify(root, HOME)
+            src = (root / "app/src/main/java/com/deepseekharness/app/ui/OnboardingUi.java").read_text()
+            self.assertIn("t.setIncludeFontPadding(true)", src)
+            self.assertIn("t.setFallbackLineSpacing(true)", src)
+            self.assertIn("b.setSingleLine(false)", src)
+            self.assertIn("b.setMaxLines(4)", src)
+            self.assertIn("brand.getTypeface()", src)
+            self.assertIn("heading.getTypeface()", src)
 
     def test_pinyin_web_typography_preserves_font_and_text_visibility(self):
         js = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
