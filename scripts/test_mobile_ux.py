@@ -39,7 +39,7 @@ class MobileUxTests(unittest.TestCase):
         self.assertNotIn('font-family:', STYLES)
         self.assertNotIn('display: none !important; } [role="menuitemradio"]', STYLES)
         self.assertIn('font(b)', ENTRY)
-        self.assertIn('b.setIncludeFontPadding(true)', ENTRY.replace('font(b);','b.setIncludeFontPadding(true)'))
+        self.assertIn('view.setIncludeFontPadding(true)', ENTRY)
 
     def test_original_ofm_nav_fix_is_retained(self):
         self.assertIn('.ofm_root .ofm_nav {', STYLES)
