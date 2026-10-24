@@ -2,95 +2,186 @@ package com.deepseekharness.app.ui;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+
+import com.deepseekharness.app.R;
 
 /**
- * First-run, Chinese mobile launcher and guidance.
- * Never handles API keys; they remain in upstream DSH provider settings.
- * Never installs any third-party plugin without user approval.
+ * WishCode phone-first launcher. The existing DSH engine, account storage,
+ * tools and permission prompts stay in their original upstream components.
+ * No API keys, prompts, passwords or web cookies pass through this Activity.
  */
 public final class WishCodeHomeActivity extends AppCompatActivity {
-  @Override
-  protected void onCreate(@Nullable Bundle state) {
-    super.onCreate(state);
-    String abi = Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "未知";
-    OnboardingUi ui = new OnboardingUi(
-        this,
-        "本机模式 · 首次配置",
-        "许愿编程",
-        "不必下载 AI 模型。先配置 DeepSeek Flash，再选择工作区开始编程。常用插件已经内置。");
-
-    ui.row("设备", "Android " + Build.VERSION.RELEASE + " · " + abi);
-    ui.note("Linux 和 Harness 在手机本地运行；模型通过 DeepSeek API 在线推理。"
-        + "不要把 API Key 发送到聊天，也不要导入来源不明的插件。");
-
-    ui.primary("① 选择模型（DeepSeek / 免费）", this::showModelChoice);
-    ui.secondary("② 开始编程 / 选择工作区", this::openLaunch);
-    ui.secondary("③ 插件中心 / 已安装插件", this::showPluginHelp);
-    ui.secondary("故障诊断 / 导出日志", () ->
-        startActivity(new Intent(this, DiagnosticActivity.class)));
-  }
-
-  private void openLaunch() {
-    Intent i = new Intent(this, MainActivity.class);
-    i.putExtra("open_launch", true);
-    startActivity(i);
-  }
-
-  private void openPlugins() {
-    Intent i = new Intent(this, MainActivity.class);
-    i.putExtra("open_plugins", true);
-    startActivity(i);
-  }
-
-  // Fixed, explicitly reviewed GitHub Release asset. Never use the npm namesake.
+  // Reviewed exact GitHub release artifact; never install the unrelated npm namesake.
   private static final String FREE_MODEL_URL =
       "https://github.com/Ebony-Vinyl/dsh-our-free-model/releases/download/v2.5.9/dsh-our-free-model-2.5.9.tgz";
   private static final String FREE_MODEL_SHA =
       "3c98427d8144041568c12dd5c61c42632d022856e8f5327e66b813fe80d269a2";
 
+  private int dp(int size) {
+    return Math.round(size * getResources().getDisplayMetrics().density);
+  }
+
+  private TextView text(String value, int sp, int color, boolean bold) {
+    TextView label = new TextView(this);
+    label.setText(value);
+    label.setTextSize(sp);
+    label.setTextColor(getColor(color));
+    label.setTypeface(Typeface.create("sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL));
+    label.setIncludeFontPadding(true);
+    label.setBreakStrategy(android.text.Layout.BREAK_STRATEGY_HIGH_QUALITY);
+    label.setGravity(Gravity.START);
+    return label;
+  }
+
+  private void addText(LinearLayout parent, TextView label, int top, int bottom) {
+    LinearLayout.LayoutParams p =
+        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    p.topMargin = dp(top);
+    p.bottomMargin = dp(bottom);
+    parent.addView(label, p);
+  }
+
+  private void action(LinearLayout parent, String title, boolean primary, Runnable run) {
+    AppCompatButton button = new AppCompatButton(this);
+    button.setText(title);
+    button.setTextSize(16);
+    button.setAllCaps(false);
+    button.setGravity(Gravity.CENTER);
+    button.setMinHeight(dp(52));
+    button.setPadding(dp(12), dp(9), dp(12), dp(9));
+    button.setBackgroundResource(
+        primary ? R.drawable.bg_btn_primary : R.drawable.bg_action_plain);
+    button.setTextColor(getColorStateList(
+        primary ? R.color.button_primary_text : R.color.primary));
+    button.setOnClickListener(v -> run.run());
+    LinearLayout.LayoutParams p =
+        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    p.topMargin = dp(10);
+    parent.addView(button, p);
+  }
+
+  @Override
+  protected void onCreate(@Nullable Bundle state) {
+    super.onCreate(state);
+    ScrollView scroll = new ScrollView(this);
+    scroll.setFillViewport(true);
+    scroll.setClipToPadding(false);
+    scroll.setVerticalScrollBarEnabled(true);
+
+    LinearLayout content = new LinearLayout(this);
+    content.setOrientation(LinearLayout.VERTICAL);
+    content.setPadding(dp(18), dp(20), dp(18), dp(26));
+    content.setBackgroundColor(getColor(R.color.surface));
+    scroll.addView(content);
+    setContentView(scroll);
+
+    addText(content, text("许愿编程", 26, R.color.text, true), 0, 3);
+    addText(content, text("像聊天一样编程 · 工具调用仍由 DSH 执行", 13,
+        R.color.text_secondary, false), 0, 18);
+
+    action(content, "开始聊天编程", true, this::openWeb);
+    addText(content, text("先选择一个测试工作区，再让模型读写文件。执行命令、插件安装和重要权限仍需确认。",
+        13, R.color.text_secondary, false), 9, 18);
+
+    addText(content, text("模型", 19, R.color.text, true), 0, 0);
+    action(content, "选择模型 · 官方 DeepSeek / 免费模型", false, this::showModelChoice);
+
+    addText(content, text("工具", 19, R.color.text, true), 22, 0);
+    action(content, "项目文件", false,
+        () -> startActivity(new Intent(this, WorkspaceFilesActivity.class)));
+    action(content, "插件管理", false, this::openPlugins);
+    action(content, "终端命令", false, this::openTerminal);
+
+    addText(content, text("安全与帮助", 19, R.color.text, true), 22, 0);
+    action(content, "权限说明", false, this::showPermissions);
+    action(content, "诊断与日志", false,
+        () -> startActivity(new Intent(this, DiagnosticActivity.class)));
+
+    String abi = Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "未知";
+    addText(content, text("Android " + Build.VERSION.RELEASE + " · " + abi
+        + "\nLinux/Harness 在手机本地运行；AI 模型通过互联网调用。",
+        12, R.color.text_muted, false), 22, 0);
+  }
+
+  private void openWeb() {
+    Intent intent = new Intent(this, MainActivity.class);
+    // Upstream consumes open_web and waits for a ready, authenticated local Web.
+    intent.putExtra("open_web", true);
+    startActivity(intent);
+  }
+
+  private void openPlugins() {
+    Intent intent = new Intent(this, MainActivity.class);
+    intent.putExtra("open_plugins", true);
+    startActivity(intent);
+  }
+
+  private void openTerminal() {
+    Intent intent = new Intent(this, MainActivity.class);
+    intent.putExtra("open_terminal", true);
+    startActivity(intent);
+  }
+
   private void showModelChoice() {
     new AlertDialog.Builder(this)
         .setTitle("选择模型接入方式")
-        .setItems(
-            new String[] {"DeepSeek 官方 API Key（按量付费）",
-                "免费模型插件（可选；有额度和隐私限制）"},
-            (dialog, which) -> {
-              if (which == 0) showModelHelp();
-              else showFreeModelNotice();
-            })
-        .setNegativeButton("取消", null)
-        .show();
+        .setItems(new String[]{
+            "DeepSeek 官方 API Key（按量计费）",
+            "免费模型插件（有额度及隐私限制）"
+        }, (dialog, selected) -> {
+          if (selected == 0) showModelHelp();
+          else showFreeModelNotice();
+        })
+        .setNegativeButton("取消", null).show();
+  }
+
+  private void showModelHelp() {
+    new AlertDialog.Builder(this)
+        .setTitle("连接 DeepSeek Flash")
+        .setMessage("你已经有的 DeepSeek API Key 无需发送给任何人。\n\n"
+            + "1. 点击开始聊天编程，进入本地 Web 工作台。\n"
+            + "2. 在设置 → 模型 → DeepSeek 粘贴 API Key。\n"
+            + "3. 保存并选择 deepseek-flash。\n\n"
+            + "模型通过网络 API 工作，Token 按官方规则计费。")
+        .setPositiveButton("进入工作台", (dialog, which) -> openWeb())
+        .setNeutralButton("开放平台", (dialog, which) ->
+            openExternal("https://platform.deepseek.com/"))
+        .setNegativeButton("返回", null).show();
   }
 
   private void showFreeModelNotice() {
     new AlertDialog.Builder(this)
-        .setTitle("免费模型 · 安装前确认")
-        .setMessage("模型通过第三方网关在线运行，不是下载到手机。\n\n"
-            + "Kilo 官方提供无 Key 匿名免费模型，但按 IP 限速，每小时最多 200 次，"
-            + "免费模型会变化，部分提供商可能记录和利用输入内容。\n\n"
-            + "这个开源插件提供 Kilo 和 OpenCode 接入；开发者不是模型服务商。"
-            + "OpenCode 部分免费模型限时且可能限制第三方客户端。"
-            + "插件还包含可选账号渠道、公告、升级与本地代理，尚未经过全面安全审计。\n\n"
-            + "只用于公开测试项目。不要发送私人源码、密钥、账号资料。"
-            + "安装前会进入上游插件确认页面；若校验失败，不要绕过。"
-            + "切勿从 npm 安装同名包。")
-        .setPositiveButton("查看插件并确认安装", (dialog, which) -> openPinnedPluginInstaller())
-        .setNeutralButton("查看开源项目", (dialog, which) ->
+        .setTitle("免费模型不是无限免费")
+        .setMessage("Kilo 网关提供无需 API Key 的免费模型，但匿名请求按 IP 限流（官方文档为每小时最多 200 次），并可能存在地区限制。\n\n"
+            + "OpenCode 的部分模型为限时免费，且官方对第三方客户端的免费访问有限制，不能保证一直可用。\n\n"
+            + "这个插件来自独立开源作者，包含额外的账号渠道、公告、升级与网关功能，尚未完成全面安全审计。"
+            + "部分免费服务商可能记录输入或用于改进模型。\n\n"
+            + "只在不含隐私及密钥的测试工作区使用。安装前查看来源和权限；不要从 npm 安装同名包。")
+        .setPositiveButton("检查安装包", (dialog, which) -> openPinnedPluginInstaller())
+        .setNeutralButton("查看 GitHub 源码", (dialog, which) ->
             openExternal("https://github.com/Ebony-Vinyl/dsh-our-free-model"))
-        .setNegativeButton("取消", null)
-        .show();
+        .setNegativeButton("取消", null).show();
   }
 
   private void openPinnedPluginInstaller() {
-    Uri link = new Uri.Builder()
+    Uri uri = new Uri.Builder()
         .scheme("dsha")
         .authority("install")
         .appendQueryParameter("url", FREE_MODEL_URL)
@@ -98,42 +189,26 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
         .appendQueryParameter("name", "dsh-our-free-model")
         .appendQueryParameter("version", "2.5.9")
         .build();
-    startActivity(new Intent(this, PluginInstallActivity.class).setData(link));
+    // PluginInstallActivity performs its own inspection and explicit confirmation.
+    startActivity(new Intent(this, PluginInstallActivity.class).setData(uri));
   }
 
-  private void showModelHelp() {
+  private void showPermissions() {
     new AlertDialog.Builder(this)
-        .setTitle("DeepSeek Flash：只需要配置，不用安装")
-        .setMessage("1. 你已有的 DeepSeek API Key 可以直接使用，无需发送给任何人。\n\n"
-            + "2. 点击【开始编程】，等本地环境就绪，进入 Web 界面。\n\n"
-            + "3. 在 Web 界面打开【设置 → 模型 → DeepSeek】，粘贴 API Key 并保存。\n\n"
-            + "4. 在对话模型选择器中选择 deepseek-flash。\n\n"
-            + "API 请求会产生使用费用。此向导不读取、保存或上传密钥。")
-        .setPositiveButton("进入编程界面", (dialog, which) -> openLaunch())
-        .setNeutralButton("DeepSeek 开放平台", (dialog, which) ->
-            openExternal("https://platform.deepseek.com/"))
-        .setNegativeButton("关闭", null)
-        .show();
-  }
-
-  private void showPluginHelp() {
-    new AlertDialog.Builder(this)
-        .setTitle("先使用内置插件，不用安装")
-        .setMessage("系统已经内置手机 Web 界面、任务通知和设备能力引导等插件。\n\n"
-            + "1. 点击【打开插件中心】，查看已安装状态与开关。\n\n"
-            + "2. 先完成模型配置和工作区测试。此时无需额外插件，也能读写代码和执行终端任务。\n\n"
-            + "3. 只有明确需要第三方功能时，才从可信来源导入仓库链接或 ZIP/TAR.GZ。\n\n"
-            + "第三方插件可能执行安装脚本和访问应用可访问的数据。")
-        .setPositiveButton("打开插件中心", (dialog, which) -> openPlugins())
-        .setNegativeButton("关闭", null)
-        .show();
+        .setTitle("文件权限与执行确认")
+        .setMessage("默认使用 workspace-write：模型只应写入已授权的工作区。\n\n"
+            + "如果出现 DEFAULT_WRITE_NOT_FULL，请先检查工作区及本次会话权限。"
+            + "不要为了消除提示直接授予无限制磁盘写入。\n\n"
+            + "Shell 命令和第三方插件可能修改、删除文件；确认命令和修改范围后再允许。")
+        .setPositiveButton("进入工作台", (dialog, which) -> openWeb())
+        .setNegativeButton("关闭", null).show();
   }
 
   private void openExternal(String url) {
     try {
       startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     } catch (ActivityNotFoundException missing) {
-      Toast.makeText(this, "浏览器未找到，请手动访问 platform.deepseek.com",
+      Toast.makeText(this, "没有可用浏览器，请复制官网地址到浏览器",
           Toast.LENGTH_LONG).show();
     }
   }
