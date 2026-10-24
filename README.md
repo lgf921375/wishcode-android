@@ -42,10 +42,10 @@
 
 针对 OnePlus 15 / Android 16 / ColorOS 16 的真实截图新增：
 - `scripts/WishCodeHomeActivity.java`：原生可滚动聊天优先首页，按钮按“开始聊天 → 模型 → 工具 → 安全”排列；复用已有 DSH 工作区、文件、插件、终端和诊断能力。
-- `scripts/wishcode-mobile.js` + `scripts/customize.py`：只注入经过认证的内置 DSH WebView，针对手机宽度的对话框、编辑输入、右侧面板、表格/代码约束尺寸；不拦截请求、API Key、提示词、插件指令或工具执行。
+- `scripts/wishcode-mobile.js` + `scripts/customize.py`：只注入经过认证的内置 DSH WebView，针对手机宽度的对话框、编辑输入、右侧面板、表格/代码设置行高/自动换行/可滚动边界；对上游 `OnboardingUi` 也启用拼音字体所需的 font padding 和多行按钮；不拦截请求、API Key、提示词、插件指令或工具执行。
 - 官方 DeepSeek Flash 接入不变；免费模型只提供**用户主动选择的安装引导**，固定 GitHub Release v2.5.9 及 SHA-256，安装确认由原生安装器负责。插件未预装也未经过全面安全审计。
 - 默认权限仍为 `workspace-write`，遇到 DEFAULT_WRITE_NOT_FULL 时先检查工作区/权限，不静默提升到 `danger-full-access`。
-- 系统范围的带拼音主题字体同时出现在 ColorOS 设置和 DeepSeek 官网，不是应用编码问题。先在手机设置切回默认字体；V0.4 不下载/打包字体文件，CSS 仅修复局部尺寸和溢出。
+- **用户明确要求保留 ColorOS 拼音字体**，不能要求更换系统字体。V0.4 原生页面继承系统字体，不强制 `sans-serif`；启用 FontPadding/FallbackLineSpacing、扩大多行文本及按钮行距；WebView 为中文标题、按钮、弹窗扩展行框和自适应滚动，不隐藏溢出文字。用户截图中 DeepSeek 官网也出现拼音，属于所选字形特征而非乱码。
 
 **避免覆盖安装冲突：** 第四次成功构建的 V0.3 使用 GitHub Runner 临时调试签名；V0.4 使用新的独立 Application ID `app.wishcode.harnessmobile.v04`，避免签名不同导致更新失败或要求清空旧版数据。两版可并存，但新版本不自动继承 API Key、配置、插件或工作区；请勿卸载 V0.3，先用测试工作区验证 V0.4。
 
