@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 BASE = "DSH-APP/DSHA@c750348a4d4b18edcb165a93b4ca66403b040b4c"
-APP_ID = "app.wishcode.harnessmobile"
+APP_ID = "app.wishcode.harnessmobile.v04"
 HOME_PATH = "app/src/main/java/com/deepseekharness/app/ui/WishCodeHomeActivity.java"
 MOBILE_PATH = "app/src/main/assets/web-integration/wishcode-mobile.js"
 MAIN_MANIFEST = '''        <activity
