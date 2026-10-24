@@ -33,6 +33,7 @@ class PatchTests(unittest.TestCase):
             self.assertEqual((root / "app/src/main/AndroidManifest.xml")
                              .read_text().count("android.intent.category.LAUNCHER"), 1)
             self.assertTrue((root / patch.HOME_PATH).exists())
+            self.assertTrue((root / patch.MOBILE_PATH).exists())
 
     def test_first_run_least_privilege_and_stop(self):
         with tempfile.TemporaryDirectory() as d:
@@ -71,17 +72,17 @@ class PatchTests(unittest.TestCase):
         self.assertIn("deepseek-flash", HOME)
         self.assertNotIn("getApiKey(", HOME)
         self.assertNotIn("setApiKey(", HOME)
-        self.assertIn("showPluginHelp", HOME)
+        self.assertIn("openPlugins", HOME)
 
     def test_pinned_free_model_install_requires_user_action(self):
         self.assertIn("showModelChoice", HOME)
         self.assertIn("showFreeModelNotice", HOME)
-        self.assertIn("查看插件并确认安装", HOME)
+        self.assertIn("检查安装包", HOME)
         self.assertIn("PluginInstallActivity.class", HOME)
         self.assertIn('appendQueryParameter("sha256", FREE_MODEL_SHA)', HOME)
         self.assertIn('appendQueryParameter("version", "2.5.9")', HOME)
         # No startup side effect; launch happens only from an explicit button.
-        constructor = HOME.split("protected void onCreate", 1)[1].split("private void openLaunch", 1)[0]
+        constructor = HOME.split("protected void onCreate", 1)[1].split("private void openWeb", 1)[0]
         self.assertNotIn("openPinnedPluginInstaller()", constructor)
 
     def test_uses_exact_release_not_impostor_npm(self):
@@ -93,6 +94,21 @@ class PatchTests(unittest.TestCase):
         self.assertIn("每小时最多 200 次", HOME)
         self.assertIn("隐私", HOME) if "隐私" in HOME else self.assertIn("数据", HOME)
         self.assertIn("不是下载到手机", HOME)
+
+    def test_mobile_layout_is_scoped_to_dsh_webview(self):
+        js = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
+        self.assertIn("max-width: 760px", js)
+        self.assertIn("data-mobile-nav", js)
+        self.assertIn("role=\\\"dialog\\\"", js)
+        self.assertIn("data-composer-input", js)
+        self.assertIn("window.top !== window", js)
+        self.assertNotIn("fetch(", js)
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            fixture(root)
+            patch.modify(root, HOME)
+            source = (root / "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java").read_text()
+            self.assertIn('read(context, "web-integration/wishcode-mobile.js")', source)
 
     def test_app_identity_is_separate(self):
         with tempfile.TemporaryDirectory() as d:
