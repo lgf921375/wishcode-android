@@ -17,20 +17,21 @@
 
 ## 本轮已提交代码
 
-1. `scripts/WishCodePreviewEntry.java`：保留“预览/工具”功能与原认证会话/预览路径，但把原来巨大的 56dp 双按钮替换为两项紧凑快捷入口，缩短“预览网页”为“预览”，按钮文字 14sp、最小高度 44dp、两行上限；继续通过 `font()` 继承系统字体和行距，避免干扰已有 HTML/工具功能。
+1. **按用户后续明确反馈调整**：聊天顶部不需要任何「预览/文件工具」常驻栏，因此 `scripts/WishCodePreviewEntry.java` 已完全删除聊天头部布局注入代码；`scripts/customize.py` 不再在 `WebPreviewActivity` 启动时调用 `WishCodePreviewEntry.install(this)`。原有聊天内容区域完全保留。仅当用户在聊天中主动点击合格的 localhost HTML 链接时才进入独立 APP 内预览页；原生首页仍保留备用的手动预览入口。系统拼音字体不被覆盖。
 2. `scripts/wishcode-mobile.js`：只在宽度小于等于 760px 的 APP 内置工作台页面应用；针对 BODY Portal 下的 `role=group` 模型菜单约束最大宽高，内部模型列表 34dvh 上限、允许纵向滚动；按钮行高/44px触摸高度，保留搜索、全部分组及原点击事件；不改推理强度菜单，不重写宿主 React/UI 包。
-3. `scripts/test_mobile_ux.py`：静态回归检查菜单 DOM 锚点、滚动限制、原功能路径、Pinyin FontPadding、无第三方网络调用/密钥操作；现有 `scripts/test_customize.py` 和 `scripts/test_preview.py` 不变。
+3. `scripts/test_mobile_ux.py`：静态回归检查**没有常驻导航**、只有用户主动点击本地合法链接进入预览、模型菜单 DOM 锚点、滚动限制、Pinyin FontPadding、无第三方网络调用/密钥操作；现有 `scripts/test_customize.py` 和 `scripts/test_preview.py` 不变。
 
 ## 非完成项与不可错误承诺
 
 - **没有实现**「自动探测每个模型可用并从选项过滤」。宿主模型选择器没有已核实的可用状态映射；插件导航的“免费模型 0”只反映某个通道当前探测，不等于其它 API、EAC、GLM 套餐和历史错误模型全不可用。不能硬编码某个模型无效或依据一次网络错误永久隐藏。下一阶段需由插件提供来源/地区/授权/可用性状态的可靠 RPC，并给用户“只显示当前可用”可撤销开关、保留查看全部的入口；在此前不得承诺自动过滤。
 - 没有增加“自动翻译 AI 英文回复”。语言输出由模型/用户提示词/服务配置决定；后续应添加**用户可控制**的简中回复偏好，不应静默修改原任务或工具命令。
 - **当前只有源码及静态检查，尚未打包和真机验证**；不代表 APK 已更新、模型可用，也不代表可绕过 `REGION_BLOCKED` 或 `AUTHORIZATION_REQUIRED`。
+- **Claude Artifacts 风格真正的对话内预览卡片仍是下一阶段功能**：当前仅支持点击经过校验的本机链接打开独立的 APP 内安全预览页。不能假称已实现“自动识别 HTML 成果并直接在聊天气泡内交互”。后续要求从真正的文件生成工具事件/预览地址显式元数据派生可点击的预览卡片，不得扫描模型文字冒充已生成文件，也不得因此添加顶部常驻导航。
 - Work 用量/订阅由 ChatGPT 管理，不属于 GitHub Actions，本轮不能恢复或充值额度。
 
 ## 后续验收
 
 - 运行 `python3 -m unittest discover -s scripts -p 'test_*.py' -v` 与 `node --check scripts/wishcode-mobile.js`；必须保留完整日志；
 - 真实 Android 构建需另外获得用户确认，仅手动一次，记录分支及完整 SHA，禁止自动重试；
-- ColorOS 拼音字体下核验：预览和文件工具条高度、聊天滚动/输入框，打开模型列表是否限高并可以独立滚动、搜索和选择、退出弹窗是否恢复焦点；检查推理强度列表、EAC/免费模型页面没有回归；
+- ColorOS 拼音字体下核验：**聊天顶部无预览/文件工具导航**且正文和输入框完整；用户点击聊天中合法 localhost URL 后才进入 APP 内独立预览并能返回会话；模型列表限高并可以独立滚动、搜索和选择、退出弹窗恢复焦点；检查推理强度列表、EAC/免费模型页面没有回归；
 - 检查真正可用模型需实际调用测试及日志，不可从候选列表可见推断服务可用。
