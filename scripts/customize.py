@@ -53,6 +53,10 @@ EXPECTED = {
     "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java": [
         ('startActivity(new Intent(this, WelcomeActivity.class));',
          'startActivity(new Intent(this, OnboardingPrepareActivity.class));'),
+        ('"是否需要恢复以前的备份？", "Restore an older backup?"',
+         '"恢复旧备份？", "Restore backup?"'),
+        ('"当前环境没有用户数据。系统暂时无法枚举卸载前的 Download/DSHA 文件；可用文件选择器直接选择备份，不需要开启所有文件访问。",',
+         '"当前安装没有用户数据。若曾导出旧备份，点「手动选择」；没有则点「不用了」继续。无需开启所有文件访问。",'),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/OnboardingUi.java": [
         ('TextView brand = text("DSHA", 18, R.color.text);',
