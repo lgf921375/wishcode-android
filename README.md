@@ -1,13 +1,13 @@
-# WishCode Android · 许愿编程 V0.3
+# WishCode Android · 许愿编程 V0.4
 
 基于 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA/releases/tag/v0.2.1-rc.2) 固定版本定制的安卓本地 DeepSeek Harness。目标是简化模型配置和插件管理；**DeepSeek API Key 请只在手机应用中输入**。
 
 ## 手动编译 APK
 
-1. 本仓库 **Actions** → **WishCode V0.3 Android APK - Manual**。
+1. 本仓库 **Actions** → **WishCode V0.4 Android APK - Manual**。
 2. 点 **Run workflow** 一次。仓库不配置 `push` 或定时触发，不能自动构建；GitHub Actions 私有仓库可能产生用量或费用。
-3. 仅在绿色 **Success**、签名与包名校验通过后，点击运行记录底部 **Artifacts → WishCode-V0.3-Android-APK**。
-4. 解压 Artifact，安装 `WishCode-v0.3-arm64-debug.apk`（Android 11+，ARM64）。如果构建失败，先核对 Actions 错误日志，**不要把 ZIP 当作 APK**。
+3. 仅在绿色 **Success**、签名与包名校验通过后，点击运行记录底部 **Artifacts → WishCode-V0.4-Android-APK**。
+4. 解压 Artifact，安装 `WishCode-v0.4-arm64-debug.apk`（Android 11+，ARM64）。如果构建失败，先核对 Actions 错误日志，**不要把 ZIP 当作 APK**。
 
 ## 源码结构
 
@@ -20,7 +20,7 @@
 
 ## 当前状态与风险
 
-截至提交时，**只有 6 项补丁单元测试通过，尚未实际编译、安装或真机测试 APK**。工作流产生调试签名包，仅供个人测试；独立包名 `app.wishcode.harnessmobile`，不会覆盖 DSHA，但也不会继承 DSHA 中的 API Key、插件或项目。请在更换测试签名或卸载前备份工作区。插件可能运行安装脚本，未经用户主动选择不安装第三方插件。
+截至提交时，**只有 6 项补丁单元测试通过，尚未实际编译、安装或真机测试 APK**。工作流产生调试签名包，仅供个人测试；独立包名 `app.wishcode.harnessmobile.v04`，不会覆盖 DSHA，但也不会继承 DSHA 中的 API Key、插件或项目。请在更换测试签名或卸载前备份工作区。插件可能运行安装脚本，未经用户主动选择不安装第三方插件。
 
 本仓库与 DNF/Godot/传奇项目完全隔离。
 
@@ -35,3 +35,17 @@
 - 已有 V0.3 也可尝试在「插件」中粘贴官方 Release URL 手工安装，**需要预览/授权**。手工从插件页面输入 URL 不自动携带固定 SHA，比 APK 内的固定 SHA 入口少了一层校验。
 - 不得将私人项目、密钥、聊天中的机密资料发给不可信免费渠道。模型实际在线运行，不在手机离线推理。
 - **升级签名提醒：** 第四次 Actions 构建使用临时 debug keystore，后续独立运行重新签名的 APK 很可能不能直接覆盖安装同包名原 APK。升级前必须备份工作区和用户数据；不要为解决签名冲突直接卸载并清空数据。要长期稳定升级需建立不上传明文私钥的持久签名管理方案。
+
+
+## V0.4 移动端优化（已提交源码，尚未编译/实机验证）
+
+针对 OnePlus 15 / Android 16 / ColorOS 16 的真实截图新增：
+- `scripts/WishCodeHomeActivity.java`：原生可滚动聊天优先首页，按钮按“开始聊天 → 模型 → 工具 → 安全”排列；复用已有 DSH 工作区、文件、插件、终端和诊断能力。
+- `scripts/wishcode-mobile.js` + `scripts/customize.py`：只注入经过认证的内置 DSH WebView，针对手机宽度的对话框、编辑输入、右侧面板、表格/代码约束尺寸；不拦截请求、API Key、提示词、插件指令或工具执行。
+- 官方 DeepSeek Flash 接入不变；免费模型只提供**用户主动选择的安装引导**，固定 GitHub Release v2.5.9 及 SHA-256，安装确认由原生安装器负责。插件未预装也未经过全面安全审计。
+- 默认权限仍为 `workspace-write`，遇到 DEFAULT_WRITE_NOT_FULL 时先检查工作区/权限，不静默提升到 `danger-full-access`。
+- 系统范围的带拼音主题字体同时出现在 ColorOS 设置和 DeepSeek 官网，不是应用编码问题。先在手机设置切回默认字体；V0.4 不下载/打包字体文件，CSS 仅修复局部尺寸和溢出。
+
+**避免覆盖安装冲突：** 第四次成功构建的 V0.3 使用 GitHub Runner 临时调试签名；V0.4 使用新的独立 Application ID `app.wishcode.harnessmobile.v04`，避免签名不同导致更新失败或要求清空旧版数据。两版可并存，但新版本不自动继承 API Key、配置、插件或工作区；请勿卸载 V0.3，先用测试工作区验证 V0.4。
+
+**真实状态：** 本轮完成代码与构建配置变更，未触发任何 Actions；V0.4 APK 编译、第三方插件安装、模型调用、ColorOS 16 页面验收均待实测，不能提前宣称通过。
