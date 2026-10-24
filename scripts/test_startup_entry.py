@@ -46,7 +46,7 @@ class StartupEntryTests(unittest.TestCase):
                 '!controller.isStarting() && !controller.isStopping()',
                 '!controller.isRestoringWebSession()',
                 '!controller.hasUnresolvedWebSession()',
-                '!controller.isUserStopped()',
+                'controller.canAutoRestart()',
                 '!com.deepseekharness.app.core.EnvironmentAccess.needsRecovery(controller)',
                 '!controller.config().isStartupRecoveryRequested()',
                 'doStart(requireActivity()',
@@ -57,7 +57,7 @@ class StartupEntryTests(unittest.TestCase):
                 self.assertIn(required, launch)
             self.assertIn('pendingWishcodeStart = false;\n          preparingStart = false;', launch)
             self.assertIn('pendingAutoEnter = false;\n    pendingWishcodeStart = false;', launch)
-            self.assertNotIn('timer.schedule(', launch)
+            # canAutoRestart() includes the persisted Web STOP_SENTINEL check.\n            self.assertNotIn('!controller.isUserStopped()\\n', launch)\n            self.assertNotIn('timer.schedule(', launch)
             self.assertNotIn('Thread.sleep(', launch)
 
 
