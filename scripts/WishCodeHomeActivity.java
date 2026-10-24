@@ -73,12 +73,12 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
   private void showFreeModelNotice() {
     new AlertDialog.Builder(this)
         .setTitle("免费模型 · 安装前确认")
-        .setMessage("模型通过第三方网关在线运行，不是下载到手机。\\n\\n"
+        .setMessage("模型通过第三方网关在线运行，不是下载到手机。\n\n"
             + "Kilo 官方提供无 Key 匿名免费模型，但按 IP 限速，每小时最多 200 次，"
-            + "免费模型会变化，部分提供商可能记录和利用输入内容。\\n\\n"
+            + "免费模型会变化，部分提供商可能记录和利用输入内容。\n\n"
             + "这个开源插件提供 Kilo 和 OpenCode 接入；开发者不是模型服务商。"
             + "OpenCode 部分免费模型限时且可能限制第三方客户端。"
-            + "插件还包含可选账号渠道、公告、升级与本地代理，尚未经过全面安全审计。\\n\\n"
+            + "插件还包含可选账号渠道、公告、升级与本地代理，尚未经过全面安全审计。\n\n"
             + "只用于公开测试项目。不要发送私人源码、密钥、账号资料。"
             + "安装前会进入上游插件确认页面；若校验失败，不要绕过。"
             + "切勿从 npm 安装同名包。")
