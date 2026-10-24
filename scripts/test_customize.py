@@ -139,7 +139,10 @@ class PatchTests(unittest.TestCase):
                 "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java"
             ]:
                 self.assertIn(after, main)
-                self.assertNotIn(before, main)
+                # For additive replacements, the upstream anchor is deliberately
+                # retained as a prefix of the new code. Do not call that drift.
+                if before not in after:
+                    self.assertNotIn(before, main)
 
     def test_coloros_pinyin_system_font_is_preserved(self):
         self.assertNotIn('Typeface.create("sans-serif"', HOME)

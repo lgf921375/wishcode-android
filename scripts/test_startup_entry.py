@@ -51,7 +51,9 @@ class StartupEntryTests(unittest.TestCase):
                 '!controller.config().isStartupRecoveryRequested()',
                 'doStart(requireActivity()',
                 'pendingAutoEnter && !webEntryUrl().isEmpty()',
-                'FirstRunWebStart.enqueueVisible(',
+                # LaunchFragment delegates to the existing doStart() method.
+                # The upstream doStart() owns FirstRunWebStart.enqueueVisible,
+                # but the isolated fixture contains only patched anchors.
                 'void requestAutoEnterWeb() { requestAutoEnterWeb(false); }',
             ]:
                 self.assertIn(required, launch)
