@@ -96,6 +96,23 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
   @Override
   protected void onCreate(@Nullable Bundle state) {
     super.onCreate(state);
+    // Android launcher opens chat by default. Home remains available explicitly
+    // by tapping the main workbench title, rather than becoming a mandatory page.
+    if (Intent.ACTION_MAIN.equals(getIntent().getAction())
+        && getIntent().hasCategory(Intent.CATEGORY_LAUNCHER)
+        && !getIntent().getBooleanExtra("wishcode_show_home", false)) {
+      // A live browser task already has the user's conversation and scroll
+      // state. Return that exact task before creating a second Web host.
+      if (BrowserTasks.resumeBackground(this, true)) {
+        finish();
+        return;
+      }
+      startActivity(new Intent(this, MainActivity.class)
+          .putExtra("open_web", true)
+          .putExtra("wishcode_auto_start_web", true));
+      finish();
+      return;
+    }
     ScrollView scroll = new ScrollView(this);
     scroll.setFillViewport(true);
     scroll.setClipToPadding(false);

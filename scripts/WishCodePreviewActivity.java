@@ -77,9 +77,17 @@ public final class WishCodePreviewActivity extends AppCompatActivity implements 
     if (chatPort < 1) { status.setText("缺少当前工作台端口，请返回聊天重新打开预览。"); return; }
     createWeb();
     // 恢复输入，不在重建或进程恢复时自动重新请求页面。
-    address.setText(state == null ? getIntent().getStringExtra("candidate") : state.getString("address", ""));
+    String candidate = state == null ? getIntent().getStringExtra("candidate")
+        : state.getString("address", "");
+    address.setText(candidate);
     widthDp = state == null ? 0 : state.getInt("width", 0);
     viewport.post(this::applyWidth);
+    // A human-initiated tap on a chat link is explicit approval to preview.
+    // Validate with the native policy again; a manual Home entry never auto-loads.
+    if (state == null && getIntent().getBooleanExtra("from_chat_link", false)
+        && WishCodePreviewPolicy.normalize(candidate, chatPort) != null) {
+      approve();
+    }
   }
 
   private void add(LinearLayout row, String title, Runnable run) {

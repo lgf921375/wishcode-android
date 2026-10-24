@@ -39,6 +39,13 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Test phone model chooser and contextual HTML preview (no network)
+        run: |
+          set -euo pipefail
+          node --check scripts/wishcode-mobile.js
+          node --check scripts/test_contextual_preview.cjs
+          node scripts/test_contextual_preview.cjs
+
       - name: Test GLM streaming protocol (no API requests)
         run: node --test tests/glm.test.mjs
 
