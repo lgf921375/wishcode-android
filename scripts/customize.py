@@ -49,8 +49,6 @@ EXPECTED = {
          '    }'),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/WebPreviewActivity.java": [
-        ('    WebFullscreenUi.install(this);',
-         '    WishCodePreviewEntry.install(this);\n    WebFullscreenUi.install(this);'),
         ('      if (request.hasGesture()\n',
          '      if (request.hasGesture() && com.deepseekharness.app.util.WishCodePreviewPolicy.normalize(url,\n'
          '          com.deepseekharness.app.util.WishCodePreviewPolicy.port(baseUrl)) != null) {\n'
