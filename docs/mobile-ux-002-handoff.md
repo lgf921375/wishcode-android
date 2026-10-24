@@ -46,3 +46,23 @@
 - **仍非 Claude Artifacts 的真正“从文件/工具事件自动生成预览卡”**：本轮只有“已渲染的本机链接 → 同消息操作 → 独立 APP 内 WebView”的渐进实现。最终版应通过可信文件创建/工具结果证据提供文件路径和端口元数据，而非依赖模型自行输出链接。
 - 新增 `scripts/test_contextual_preview.cjs`（Node 虚拟 DOM 合同测试）和 `scripts/test_mobile_ux.py` 的额外测试：合法链接、外网/带凭据/禁止端口被拒、流式追加后出现入口、重复扫描不会重复加入、原生显式操作约束。静态脚本检查/模拟 DOM 检查不等于 Android 实机。
 - 本轮不触发云编译；后续仍需在真实 OnePlus 15 证明：当消息中显示 `http://127.0.0.1:4181/` 时有同消息预览操作，点击实际打开安全预览网页；URL 无响应时显示错误，修改后刷新；聊天顶部保持无工具栏且模型弹窗可滚动。
+
+
+## 实机补充：下次启动直接进入工作台（启动路径优化）
+
+**用户 19:53 实机截图**：OnePlus 15 的 `许愿编程 · 预览测试版` 首页按「开始聊天编程」后，还进入了 DSHA 原生「启动 DSHA / 重启 / 停止」页；即使运行环境标记 READY，仍需再次点击才能到聊天。用户明确要求下次点击桌面 APP 图标后直接进入工作窗。
+
+**已提交隔离分支的源码候选**：
+1. `WishCodeHomeActivity.onCreate` 只在真正 `Intent.ACTION_MAIN + CATEGORY_LAUNCHER` 且非显式 `wishcode_show_home` 时，直接启动 `MainActivity`，携带 `open_web=true` / `wishcode_auto_start_web=true`，马上 finish；不再强制展示冗余介绍首页。原先进阶模型/插件/预览/诊断入口仍在内部首页。
+2. `customize.py` 精确 patch 上游 `MainActivity`：消费独立的 `wishcode_auto_start_web` 需求，转交 `LaunchFragment`；在原生 DSHA 标题点击可显式打开旧高级首页（`wishcode_show_home=true`），以备诊断和高级配置。
+3. `LaunchFragment` 复用原有 `pendingAutoEnter` 和 `webEntryUrl()` 的鉴权就绪判断，不暴露/持久化 Token。已就绪直接进入 WebPreviewActivity；冷启动未就绪时，在**可见 Fragment 内**、controller 非启动/停止/恢复、无遗留会话、无待修复环境、无用户手动停机状态下调用原有 `doStart -> FirstRunWebStart.enqueueVisible` **仅一次**；成功后等真实本机鉴权地址出现再进入聊天，失败则保留启动页/诊断供用户操作，不自动重试。
+4. 用户显式点击 Stop、Activity 退后台/页面消失时清理待自动启动状态。首次安装、Welcome/Extract、恢复备份及手动权限确认流程不绕过。
+5. 新增 `scripts/test_startup_entry.py` 源码合同检查。固定上游 `MainActivity.java` 5 处、`LaunchFragment.java` 6 处精确锚点均被只读核对出现 1 次；**尚未执行完整 Python、Android Java 编译或手机冷启动验收**。
+
+**手机验收要求**（分开截图记录）：
+- APP 已运行时从手机桌面点图标：不显示定制介绍页，若已鉴权应直接返回原聊天会话；
+- 完全退出/系统回收进程后的冷启动：最多一次受保护启动，待真实 Web 鉴权就绪后自动进入；检查弱网下与运行环境已停止时的行为；
+- 点击「停止」后不得自动重启；启动失败、权限拒绝、备份恢复/环境修复必须保留可到达的原生诊断；
+- 返回/后台切换、旋转屏幕、原生标题打开高级首页，仍可调整 API/插件与读取日志；
+- **保留 ColorOS 拼音字体和现有工作区/模型凭据，不要求重装或抹数据**。
+- **当前手机已装 APK 不包含上述新补丁**。合并执行分支后须在用户明确授权下手动构建，不允许自动触发/自动重试，不能用静态测试替代实机判定。
