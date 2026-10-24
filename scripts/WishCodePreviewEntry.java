@@ -2,9 +2,6 @@ package com.deepseekharness.app.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatButton;
 import com.deepseekharness.app.util.WishCodePreviewPolicy;
@@ -44,44 +41,4 @@ public final class WishCodePreviewEntry {
         .putExtra("chat_port", chatPort).putExtra("candidate", candidate));
   }
 
-  /** Small shortcuts belong above the chat, not in two huge full-width cards. */
-  private static AppCompatButton shortcut(Activity host, String title, Runnable action) {
-    AppCompatButton b = button(host, title, action);
-    float density = host.getResources().getDisplayMetrics().density;
-    b.setTextSize(14);
-    b.setSingleLine(false);  // ColorOS pinyin glyphs must keep their own line box.
-    b.setMaxLines(2);
-    b.setMinHeight(Math.round(44 * density));
-    b.setPadding(Math.round(5 * density), Math.round(3 * density),
-        Math.round(5 * density), Math.round(3 * density));
-    return b;
-  }
-
-  public static void install(Activity host) {
-    ViewGroup content = host.findViewById(android.R.id.content);
-    View page = content.getChildAt(0);
-    content.removeView(page);
-    LinearLayout column = new LinearLayout(host);
-    column.setOrientation(LinearLayout.VERTICAL);
-    LinearLayout bar = new LinearLayout(host);
-    bar.setOrientation(LinearLayout.HORIZONTAL);
-    bar.setPadding(0, 0, 0, 0);
-    bar.addView(shortcut(host, "预览", () -> open(host, null)),
-        new LinearLayout.LayoutParams(0, -2, 1));
-    bar.addView(shortcut(host, "文件 / 工具", () -> tools(host)),
-        new LinearLayout.LayoutParams(0, -2, 1));
-    column.addView(bar, new LinearLayout.LayoutParams(-1, -2));
-    column.addView(page, new LinearLayout.LayoutParams(-1, 0, 1));
-    content.addView(column, new ViewGroup.LayoutParams(-1, -1));
-  }
-
-  private static void tools(Activity host) {
-    new DshaDialogBuilder(host).setTitle("项目工具")
-        .setItems(new String[]{"项目文件", "插件管理", "终端命令", "模型 / GitHub 帮助"}, (dialog, which) -> {
-          if (which == 0) host.startActivity(new Intent(host, WorkspaceFilesActivity.class));
-          else if (which == 3) host.startActivity(new Intent(host, WishCodeHomeActivity.class));
-          else host.startActivity(new Intent(host, MainActivity.class)
-              .putExtra(which == 1 ? "open_plugins" : "open_terminal", true));
-        }).setNegativeButton("返回聊天", null).show();
-  }
 }
