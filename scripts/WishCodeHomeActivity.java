@@ -101,6 +101,12 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     if (Intent.ACTION_MAIN.equals(getIntent().getAction())
         && getIntent().hasCategory(Intent.CATEGORY_LAUNCHER)
         && !getIntent().getBooleanExtra("wishcode_show_home", false)) {
+      // A live browser task already has the user's conversation and scroll
+      // state. Return that exact task before creating a second Web host.
+      if (BrowserTasks.resumeBackground(this, true)) {
+        finish();
+        return;
+      }
       startActivity(new Intent(this, MainActivity.class)
           .putExtra("open_web", true)
           .putExtra("wishcode_auto_start_web", true));
