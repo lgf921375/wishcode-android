@@ -8,17 +8,22 @@ STYLES = (ROOT / "wishcode-mobile.js").read_text(encoding="utf-8")
 
 
 class MobileUxTests(unittest.TestCase):
-    def test_chat_shortcuts_are_compact_and_preserve_functionality(self):
-        self.assertIn('shortcut(host, "预览"', ENTRY)
-        self.assertIn('shortcut(host, "文件 / 工具"', ENTRY)
-        self.assertIn('open(host, null)', ENTRY)
-        self.assertIn('tools(host)', ENTRY)
-        self.assertNotIn('bar.addView(button(host, "预览网页"', ENTRY)
-        self.assertIn('b.setMinHeight(Math.round(44 * density))', ENTRY)
-        self.assertIn('b.setTextSize(14)', ENTRY)
-        self.assertIn('b.setSingleLine(false)', ENTRY)
-        self.assertIn('b.setMaxLines(2)', ENTRY)
-        self.assertIn('column.addView(page, new LinearLayout.LayoutParams(-1, 0, 1))', ENTRY)
+    def test_chat_has_no_permanent_preview_toolbar(self):
+        patch_source = (ROOT / "customize.py").read_text(encoding="utf-8")
+        self.assertNotIn("WishCodePreviewEntry.install(this)", patch_source)
+        self.assertNotIn("public static void install(Activity host)", ENTRY)
+        self.assertNotIn("shortcut(host", ENTRY)
+        self.assertNotIn("bar.addView(", ENTRY)
+        # Only a real user click on a validated local link can open preview.
+        self.assertIn("WishCodePreviewPolicy.normalize(url", patch_source)
+        self.assertIn("request.hasGesture()", patch_source)
+        self.assertIn("WishCodePreviewEntry.open(WebPreviewActivity.this, url)", patch_source)
+        self.assertIn("WishCodePreviewActivity.class", ENTRY)
+        self.assertIn("putExtra(\"chat_port\", chatPort)", ENTRY)
+        self.assertIn('putExtra("candidate", candidate)', ENTRY)
+        # Home screen retains the manual preview fallback outside of chat.
+        home = (ROOT / "WishCodeHomeActivity.java").read_text(encoding="utf-8")
+        self.assertIn("WishCodePreviewEntry.open(this, null)", home)
 
     def test_model_popover_only_is_constrained(self):
         # Verified upstream shape: model menu is portaled to body, role=group,
