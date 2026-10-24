@@ -1,0 +1,88 @@
+{
+  "base": "DSH-APP/DSHA@c750348a4d4b18edcb165a93b4ca66403b040b4c",
+  "application_id": "app.wishcode.harnessmobile.v05preview",
+  "android_apk_built": false,
+  "compatibility_verified": false,
+  "changes": [
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/DshaApp.java",
+      "before": "fbb7d83defc65e3c7fee84e6a5086e29ecd6b525c03cc0b3994e9c7b2165ff9c",
+      "after": "4b516e2743fc8a0a51d8764fd3ea0bda521433ae0b83f4c0757d61ebc075fe13"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/WebPreviewActivity.java",
+      "before": "737a758521d05c631f71c0fe114d30905ff82eee0aab6f69f8af47500e48428e",
+      "after": "beefe6e52dafb999bbfa71b16b102b0d37b715b380d56cc2a8d07ab73756d2f9"
+    },
+    {
+      "path": "app/build.gradle",
+      "before": "a73f023a0da1d53ce3d7c2a0fb0b24b23828197a06ad3ad5286dd17df35ac138",
+      "after": "35e8f432bf32453f519314512acb5ad06d839ded816f0b206667eec7ea1b5d15"
+    },
+    {
+      "path": "app/src/main/res/values/strings.xml",
+      "before": "0a5682211c16d65ba931f1113ba361e278bbfa2eba7a365ac9886b8e303f04f3",
+      "after": "fa9a3b389b9160a8a107a87d69637854dc8b548340cc1036e977f95bfaa98167"
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "before": "65ffb1e0263227c03b6873ef3d636590ae0ffab7f68efef07c2b311bba9a221d",
+      "after": "c3a39b27fa19bef3bbb50b790958dc0cc2b12efca949d5337164747f21b94697"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/core/ConfigStore.java",
+      "before": "bce36d1c7bd84128c351e6c47ad18d5b2bf24a6646e273125a48a4b88adfe133",
+      "after": "4a73dc4a85c6786abf0bd5ea2f6c153f9f36a9de43fae5800f1b8293487dd8df"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java",
+      "before": "b62b64e3103ef204d6078849e286409ddffe0b0e3cb0389a6b9cd7e6bed0296f",
+      "after": "980e72a41e0cb260ca4dc3f6270aa31495a5911d6313e73982a506fad3343170"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/OnboardingUi.java",
+      "before": "4dc2a4fe89c17831c2931d0ccb0bccba714e1b2bb08f519bd5a4c8a08b9e73bb",
+      "after": "60ad24a58e4446cb541553c5e4762e4ddda90cd01123ecaeb849df3d8cbeeaca"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java",
+      "before": "dcbe5ffb0a356bc420b8d2d0c0ca995b5c4b98c4f5ab1491ec6eb77810805b7e",
+      "after": "25215f6550ceafadbb2964392fce23666e233d6a5c039448fc4246e48a4cbed9"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/LaunchFragment.java",
+      "before": "04aaf83a46cd305a3617997318618b588a93dd9dd7e3c025c3b7b0109247de49",
+      "after": "8dfbc17e8373b25fb306445a5b7f6e4c2ce5013de60f3e9f9375729ae4d4495c"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/WishCodePreviewActivity.java",
+      "before": null,
+      "after": "1ce95549af11371def04159768a417cdb27129e56149b3717814a6b748cc54d4"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/WishCodePreviewEntry.java",
+      "before": null,
+      "after": "10d094c381fbb7f2288c9989d7e0e03b91c68fb1a7b71a47e3a98c2e3e275696"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/util/WishCodePreviewPolicy.java",
+      "before": null,
+      "after": "3cf850081346b0f6a1db926871d9394e825754126d99905bfd2361450c3faad2"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/util/WishCodePreviewHttp.java",
+      "before": null,
+      "after": "23987419c7950aba5467ef0e8f84c242b929440821b650c42cacc20308bb2610"
+    },
+    {
+      "path": "app/src/main/java/com/deepseekharness/app/ui/WishCodeHomeActivity.java",
+      "before": null,
+      "after": "3b99e2dfef37a69cb3e4d68b2c6da51f77df4d81466c5fbc324a3f3c2841350d"
+    },
+    {
+      "path": "app/src/main/assets/web-integration/wishcode-mobile.js",
+      "before": null,
+      "after": "cb0ace08da314cfe0015e738b38701122e1e3478271e9c41564f062cf87d7473"
+    }
+  ]
+}

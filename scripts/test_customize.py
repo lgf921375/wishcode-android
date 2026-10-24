@@ -110,6 +110,20 @@ class PatchTests(unittest.TestCase):
             source = (root / "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java").read_text()
             self.assertIn('read(context, "web-integration/wishcode-mobile.js")', source)
 
+    def test_ofm_mobile_tabs_stop_covering_page(self):
+        js = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
+        self.assertIn(".ofm_root .ofm_nav {", js)
+        self.assertIn("position: relative !important", js)
+        self.assertIn("top: auto !important", js)
+        self.assertIn(".ofm_root .ofm_tabs {", js)
+        self.assertIn("flex-wrap: nowrap !important", js)
+        self.assertIn("overflow-x: auto !important", js)
+        self.assertIn(".ofm_root .ofm_tabglider { display: none !important; }", js)
+        self.assertIn('.ofm_root .ofm_tab[data-on="true"]', js)
+        self.assertIn("min-height: 44px", js)
+        self.assertNotIn("font-family:", js)
+        self.assertNotIn("fetch(", js)
+
     def test_restore_dialog_compact_copy_preserves_choice(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -186,7 +200,7 @@ class PatchTests(unittest.TestCase):
             root = Path(d)
             fixture(root)
             patch.modify(root, HOME)
-            self.assertIn('applicationId "app.wishcode.harnessmobile.v04"',
+            self.assertIn('applicationId "app.wishcode.harnessmobile.v05preview"',
                           (root / "app/build.gradle").read_text())
 
 

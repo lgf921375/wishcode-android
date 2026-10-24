@@ -1,0 +1,76 @@
+test_anchor_drift_fails_without_partial_changes (test_customize.PatchTests.test_anchor_drift_fails_without_partial_changes) ... ok
+test_app_identity_is_separate (test_customize.PatchTests.test_app_identity_is_separate) ... ok
+test_coloros_pinyin_system_font_is_preserved (test_customize.PatchTests.test_coloros_pinyin_system_font_is_preserved) ... ok
+test_first_run_least_privilege_and_stop (test_customize.PatchTests.test_first_run_least_privilege_and_stop) ... ok
+test_free_models_are_never_claimed_unlimited_or_offline (test_customize.PatchTests.test_free_models_are_never_claimed_unlimited_or_offline) ... ok
+test_github_search_plugin_is_opt_in_and_pinned (test_customize.PatchTests.test_github_search_plugin_is_opt_in_and_pinned) ... ok
+test_guide_has_no_credential_storage (test_customize.PatchTests.test_guide_has_no_credential_storage) ... ok
+test_home_is_created (test_customize.PatchTests.test_home_is_created) ... ok
+test_mobile_layout_is_scoped_to_dsh_webview (test_customize.PatchTests.test_mobile_layout_is_scoped_to_dsh_webview) ... ok
+test_onboarding_preserves_pinyin_metrics (test_customize.PatchTests.test_onboarding_preserves_pinyin_metrics) ... ok
+test_pinned_free_model_install_requires_user_action (test_customize.PatchTests.test_pinned_free_model_install_requires_user_action) ... ok
+test_pinyin_web_typography_preserves_font_and_text_visibility (test_customize.PatchTests.test_pinyin_web_typography_preserves_font_and_text_visibility) ... ok
+test_reapply_refused (test_customize.PatchTests.test_reapply_refused) ... ok
+test_restore_dialog_compact_copy_preserves_choice (test_customize.PatchTests.test_restore_dialog_compact_copy_preserves_choice) ... ok
+test_uses_exact_release_not_impostor_npm (test_customize.PatchTests.test_uses_exact_release_not_impostor_npm) ... ok
+test_duplicate_component_stops (test_pin_linux_aapt2.TestPinLinuxAapt2.test_duplicate_component_stops) ... ok
+test_no_verification_disable (test_pin_linux_aapt2.TestPinLinuxAapt2.test_no_verification_disable) ... ok
+test_reapply_must_fail (test_pin_linux_aapt2.TestPinLinuxAapt2.test_reapply_must_fail) ... ok
+test_supplement_only_linux_pin (test_pin_linux_aapt2.TestPinLinuxAapt2.test_supplement_only_linux_pin) ... ok
+test_version_drift_stops (test_pin_linux_aapt2.TestPinLinuxAapt2.test_version_drift_stops) ... ok
+test_windows_hash_drift_stops (test_pin_linux_aapt2.TestPinLinuxAapt2.test_windows_hash_drift_stops) ... ok
+test_java_policy_and_http (test_preview.PreviewTests.test_java_policy_and_http) ... PASS localhost normalization
+PASS explicit IPv4 port
+PASS encoded path preserved
+PASS reject URL case 0
+PASS reject URL case 1
+PASS reject URL case 2
+PASS reject URL case 3
+PASS reject URL case 4
+PASS reject URL case 5
+PASS reject URL case 6
+PASS reject URL case 7
+PASS reject URL case 8
+PASS reject URL case 9
+PASS reject URL case 10
+PASS reject URL case 11
+PASS reject URL case 12
+PASS reject URL case 13
+PASS reject URL case 14
+PASS reject URL case 15
+PASS reject URL case 16
+PASS reject URL case 17
+PASS reject URL case 18
+PASS reject URL case 19
+PASS reject URL case 20
+PASS reject URL case 21
+PASS reject URL case 22
+PASS reject URL case 23
+PASS reject URL case 24
+PASS same-origin resource query
+PASS cross-port resource denied
+PASS external resource denied
+PASS resource credentials denied
+PASS missing approval denied
+PASS workers denied
+PASS connect restricted
+PASS real HTTP 200
+PASS HTML MIME
+PASS UTF-8 response body
+PASS real HTTP 404 preserved
+PASS redirect rejected
+PASS redirect target never requested
+PASS POST rejected before network
+PASS cross-port rejected before network
+PASS no Cookie or Authorization sent
+PASS stopped server is connection error
+TOTAL 45 passed; Android WebView/device NOT tested
+ok
+test_java_ui_syntax (test_preview.PreviewTests.test_java_ui_syntax) ... Java syntax parsed: 5 files; Android types NOT checked
+ok
+test_no_native_bridge_and_restricted_webview (test_preview.PreviewTests.test_no_native_bridge_and_restricted_webview) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 1.291s
+
+OK
