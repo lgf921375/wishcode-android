@@ -60,11 +60,11 @@ EXPECTED = {
     ],
     "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java": [
         ('''        + read(context, "web-integration/page.js")
-        + "\nwindow.__dshaNativePresentation.install("''',
+        + "\\nwindow.__dshaNativePresentation.install("''',
          '''        + read(context, "web-integration/page.js")
-        + "\n"
+        + "\\n"
         + read(context, "web-integration/wishcode-mobile.js")
-        + "\nwindow.__dshaNativePresentation.install("'''),
+        + "\\nwindow.__dshaNativePresentation.install("'''),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/LaunchFragment.java": [
         ('''    start.setOnClickListener(
