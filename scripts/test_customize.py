@@ -73,6 +73,27 @@ class PatchTests(unittest.TestCase):
         self.assertNotIn("setApiKey(", HOME)
         self.assertIn("showPluginHelp", HOME)
 
+    def test_pinned_free_model_install_requires_user_action(self):
+        self.assertIn("showModelChoice", HOME)
+        self.assertIn("showFreeModelNotice", HOME)
+        self.assertIn("查看插件并确认安装", HOME)
+        self.assertIn("PluginInstallActivity.class", HOME)
+        self.assertIn('appendQueryParameter("sha256", FREE_MODEL_SHA)', HOME)
+        self.assertIn('appendQueryParameter("version", "2.5.9")', HOME)
+        # No startup side effect; launch happens only from an explicit button.
+        constructor = HOME.split("protected void onCreate", 1)[1].split("private void openLaunch", 1)[0]
+        self.assertNotIn("openPinnedPluginInstaller()", constructor)
+
+    def test_uses_exact_release_not_impostor_npm(self):
+        self.assertIn("Ebony-Vinyl/dsh-our-free-model/releases/download/v2.5.9/", HOME)
+        self.assertIn("3c98427d8144041568c12dd5c61c42632d022856e8f5327e66b813fe80d269a2", HOME)
+        self.assertNotIn("dsh plugin add dsh-our-free-model", HOME)
+
+    def test_free_models_are_never_claimed_unlimited_or_offline(self):
+        self.assertIn("每小时最多 200 次", HOME)
+        self.assertIn("隐私", HOME) if "隐私" in HOME else self.assertIn("数据", HOME)
+        self.assertIn("不是下载到手机", HOME)
+
     def test_app_identity_is_separate(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
