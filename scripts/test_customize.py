@@ -110,6 +110,23 @@ class PatchTests(unittest.TestCase):
             source = (root / "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java").read_text()
             self.assertIn('read(context, "web-integration/wishcode-mobile.js")', source)
 
+    def test_restore_dialog_compact_copy_preserves_choice(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            fixture(root)
+            patch.modify(root, HOME)
+            main = (root / "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java").read_text()
+            self.assertIn('"恢复旧备份？", "Restore backup?"', main)
+            self.assertIn("若曾导出旧备份", main)
+            self.assertIn("无需开启所有文件访问", main)
+            self.assertNotIn("是否需要恢复以前的备份？", main)
+            # Only content anchors are touched, so upstream restore/skip handlers remain intact.
+            for before, after in patch.EXPECTED[
+                "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java"
+            ]:
+                self.assertIn(after, main)
+                self.assertNotIn(before, main)
+
     def test_coloros_pinyin_system_font_is_preserved(self):
         self.assertNotIn('Typeface.create("sans-serif"', HOME)
         self.assertIn('label.getTypeface()', HOME)
