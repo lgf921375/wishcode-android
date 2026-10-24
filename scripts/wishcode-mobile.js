@@ -1,4 +1,4 @@
-/* WishCode V0.4: scoped narrow-screen resilience for the embedded DSH Web UI.
+/* WishCode V0.4: Pinyin-font-safe narrow-screen spacing for embedded DSH Web UI.
  * Runs only via upstream WebPageScripts.presentation in the authenticated
  * app WebView. Does not touch prompts, sessions, credentials or tool dispatch.
  */
@@ -10,7 +10,7 @@
   style.textContent = [
     '@media screen and (max-width: 760px) {',
     '  html, body {',
-    '    width: 100%; max-width: 100%; overflow-x: clip; box-sizing: border-box;',
+    '    width: 100%; max-width: 100%; overflow-x: auto; box-sizing: border-box;',
     '  }',
     '  [data-mobile-nav="frame"], [data-sidebar-right-panel] {',
     '    box-sizing: border-box; max-width: 100vw; min-width: 0 !important;',
@@ -19,14 +19,17 @@
     '  [data-sidebar-right-panel] :is(main, section, article, form) {',
     '    box-sizing: border-box; min-width: 0; max-width: 100%;',
     '  }',
-    '  [data-mobile-nav="frame"] :is(h1,h2,h3,p,li,label),',
-    '  [role="dialog"] :is(h1,h2,h3,p,li,label),',
-    '  [aria-modal="true"] :is(h1,h2,h3,p,li,label) {',
-    '    overflow-wrap: anywhere;',
+    '  /* Keep ColorOS pinyin ruby/diacritics inside line boxes. */',
+    '  [data-mobile-nav="frame"] :is(h1,h2,h3,p,li,label,button,[role="button"],[role="tab"]),',
+    '  [role="dialog"] :is(h1,h2,h3,p,li,label,button,[role="button"]),',
+    '  [aria-modal="true"] :is(h1,h2,h3,p,li,label,button,[role="button"]) {',
+    '    line-height: 1.9 !important; overflow-wrap: break-word;',
+    '    white-space: normal; min-width: 0; max-width: 100%;',
     '  }',
     '  :is([role="dialog"], [aria-modal="true"], dialog[open]) {',
     '    box-sizing: border-box; max-width: min(94vw, 620px) !important;',
-    '    max-height: 88dvh !important; overflow-y: auto; overscroll-behavior: contain;',
+    '    min-width: 0 !important; max-height: 85dvh !important;',
+    '    overflow-y: auto; overflow-x: auto; overscroll-behavior: contain;',
     '  }',
     '  :is([role="dialog"], [aria-modal="true"], dialog[open])',
     '    :is(input, textarea, select, button) {',
@@ -34,6 +37,14 @@
     '  }',
     '  [data-composer-input], [class*="_composerSeat"] {',
     '    box-sizing: border-box; max-width: 100%; min-width: 0;',
+    '  }',
+    '  /* Avoid clipped text in settings rows and plugin-install confirmations. */',
+    '  :is([role="dialog"], [aria-modal="true"], dialog[open]) :is(button,[role="button"]) {',
+    '    min-height: 48px; height: auto !important;',
+    '    white-space: normal !important; overflow-wrap: break-word;',
+    '  }',
+    '  :is([role="dialog"], [aria-modal="true"], dialog[open]) :is(input,textarea,select) {',
+    '    max-width: 100%; min-width: 0; flex-shrink: 1;',
     '  }',
     '  [data-mobile-nav="frame"] :is(pre,table),',
     '  :is([role="dialog"], [aria-modal="true"]) :is(pre,table) {',
