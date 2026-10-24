@@ -75,6 +75,30 @@ EXPECTED = {
     "app/src/main/java/com/deepseekharness/app/ui/MainActivity.java": [
         ('startActivity(new Intent(this, WelcomeActivity.class));',
          'startActivity(new Intent(this, OnboardingPrepareActivity.class));'),
+        ('  private boolean pendingOpenWeb;',
+         '  private boolean pendingOpenWeb;\n'
+         '  private boolean pendingWishcodeAutoStart;'),
+        ('    TextView title = findViewById(R.id.app_title);\n'
+         '    renderThemeButton();',
+         '    TextView title = findViewById(R.id.app_title);\n'
+         '    title.setOnClickListener(v -> startActivity(new Intent(this, '
+         'WishCodeHomeActivity.class).putExtra("wishcode_show_home", true)));\n'
+         '    renderThemeButton();'),
+        ('              args.putBoolean(LaunchFragment.ARG_OPEN_WEB, true);\n'
+         '              f.setArguments(args);',
+         '              args.putBoolean(LaunchFragment.ARG_OPEN_WEB, true);\n'
+         '              args.putBoolean("wishcode_auto_start_web", pendingWishcodeAutoStart);\n'
+         '              pendingWishcodeAutoStart = false;\n'
+         '              f.setArguments(args);'),
+        ('    intent.removeExtra("open_web");\n'
+         '    BottomNavigationView nav = findViewById(R.id.bottom_nav);',
+         '    intent.removeExtra("open_web");\n'
+         '    pendingWishcodeAutoStart = intent.getBooleanExtra("wishcode_auto_start_web", false);\n'
+         '    intent.removeExtra("wishcode_auto_start_web");\n'
+         '    BottomNavigationView nav = findViewById(R.id.bottom_nav);'),
+        ('      ((LaunchFragment) shown).requestAutoEnterWeb();',
+         '      ((LaunchFragment) shown).requestAutoEnterWeb(pendingWishcodeAutoStart);\n'
+         '      pendingWishcodeAutoStart = false;'),
         ('"是否需要恢复以前的备份？", "Restore an older backup?"',
          '"恢复旧备份？", "Restore backup?"'),
         ('"当前环境没有用户数据。系统暂时无法枚举卸载前的 Download/DSHA 文件；可用文件选择器直接选择备份，不需要开启所有文件访问。",',
@@ -104,6 +128,48 @@ EXPECTED = {
         + "\\nwindow.__dshaNativePresentation.install("'''),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/LaunchFragment.java": [
+        ('  private boolean pendingAutoEnter;',
+         '  private boolean pendingAutoEnter;\n'
+         '  private boolean pendingWishcodeStart;'),
+        ('          if (pendingAutoEnter && !webEntryUrl().isEmpty()) {\n'
+         '            pendingAutoEnter = false;\n'
+         '            enterWeb();\n'
+         '          }',
+         '          if (pendingAutoEnter && !webEntryUrl().isEmpty()) {\n'
+         '            pendingAutoEnter = false;\n'
+         '            pendingWishcodeStart = false;\n'
+         '            enterWeb();\n'
+         '          } else if (pendingAutoEnter && pendingWishcodeStart\n'
+         '              && getView() != null && isResumed()\n'
+         '              && !controller.isStarting() && !controller.isStopping()\n'
+         '              && !controller.isRestoringWebSession()\n'
+         '              && !controller.hasUnresolvedWebSession()\n'
+         '              && !controller.isUserStopped()\n'
+         '              && !com.deepseekharness.app.core.EnvironmentAccess.needsRecovery(controller)\n'
+         '              && !controller.config().isStartupRecoveryRequested()) {\n'
+         '            // Exactly one user-initiated launcher start; never auto-retry after failure.\n'
+         '            pendingWishcodeStart = false;\n'
+         '            doStart(requireActivity(),\n'
+         '                getView().findViewById(R.id.launch_status),\n'
+         '                getView().findViewById(R.id.launch_start));\n'
+         '          }'),
+        ('      getArguments().remove(ARG_OPEN_WEB);\n'
+         '      pendingAutoEnter = true;',
+         '      getArguments().remove(ARG_OPEN_WEB);\n'
+         '      pendingWishcodeStart = getArguments().getBoolean("wishcode_auto_start_web", false);\n'
+         '      getArguments().remove("wishcode_auto_start_web");\n'
+         '      pendingAutoEnter = true;'),
+        ('  void requestAutoEnterWeb() {\n'
+         '    pendingAutoEnter = true;',
+         '  void requestAutoEnterWeb() { requestAutoEnterWeb(false); }\n'
+         '  void requestAutoEnterWeb(boolean autoStart) {\n'
+         '    pendingWishcodeStart = autoStart;\n'
+         '    pendingAutoEnter = true;'),
+        ('    // 页面不可见时撤销自动进入：用户离开了启动页，回来不该被"突袭"打开 Web。\n'
+         '    pendingAutoEnter = false;',
+         '    // 页面不可见时撤销自动进入：用户离开了启动页，回来不该被"突袭"打开 Web。\n'
+         '    pendingAutoEnter = false;\n'
+         '    pendingWishcodeStart = false;'),
         ('''    start.setOnClickListener(
         x -> {
           if (webReady || !webEntryUrl().isEmpty()) {
