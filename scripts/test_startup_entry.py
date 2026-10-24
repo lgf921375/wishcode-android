@@ -57,7 +57,9 @@ class StartupEntryTests(unittest.TestCase):
                 self.assertIn(required, launch)
             self.assertIn('pendingWishcodeStart = false;\n          preparingStart = false;', launch)
             self.assertIn('pendingAutoEnter = false;\n    pendingWishcodeStart = false;', launch)
-            # canAutoRestart() includes the persisted Web STOP_SENTINEL check.\n            self.assertNotIn('!controller.isUserStopped()\\n', launch)\n            self.assertNotIn('timer.schedule(', launch)
+            # canAutoRestart() includes the persisted Web STOP_SENTINEL check.
+            self.assertNotIn('!controller.isUserStopped()', launch)
+            self.assertNotIn('timer.schedule(', launch)
             self.assertNotIn('Thread.sleep(', launch)
 
 
