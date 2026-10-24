@@ -14,13 +14,14 @@
 - `.github/workflows/build-custom-apk.yml`：仅手动编译、版本锁定、SHA 验证与 APK 验证。
 - `scripts/customize.py`：固定上游代码锚点的 fail-closed 补丁。
 - `scripts/WishCodeHomeActivity.java`：简化中文主页，DeepSeek Flash 和插件设置引导。
-- `scripts/test_customize.py`：补丁逻辑回归测试。
+- `scripts/test_customize.py`、`scripts/test_pin_linux_aapt2.py`：定制补丁与构件 SHA-256 契约测试（运行结果需通过下一次手动构建确认）。
+- `scripts/wishcode-mobile.js`：仅在 APP 的 WebView 中注入的窄屏布局保护；不注入外部浏览器页面。
 
 上游完整源码与离线资源来自公开 GitHub Release 附件 `DSHA-0.2.1-rc.2-20261022.2100-source.zip`，SHA-256 固定为 `ef134fe8713bfa4d6cf3bdea883be1591246d4b78ace16bd924f6d739188425a`。不得用缺离线运行时的 GitHub 自动源码压缩包替代。
 
 ## 当前状态与风险
 
-截至提交时，**只有 6 项补丁单元测试通过，尚未实际编译、安装或真机测试 APK**。工作流产生调试签名包，仅供个人测试；独立包名 `app.wishcode.harnessmobile.v04`，不会覆盖 DSHA，但也不会继承 DSHA 中的 API Key、插件或项目。请在更换测试签名或卸载前备份工作区。插件可能运行安装脚本，未经用户主动选择不安装第三方插件。
+**V0.3 历史事实：** GitHub Actions #4 已成功编译并通过签名校验，用户在一加 15 实机启动了原 DSH 工作台，但反馈页面窄屏裁切和系统拼音主题影响。**V0.4 现状：** 新增源码与测试、手动工作流已提交；尚未运行 V0.4 GitHub Actions，不能把 V0.3 的成功当作 V0.4 编译/安装通过。工作流产生调试签名包，仅供个人测试；独立包名 `app.wishcode.harnessmobile.v04`，不会覆盖 DSHA，但也不会继承 DSHA 中的 API Key、插件或项目。请在更换测试签名或卸载前备份工作区。插件可能运行安装脚本，未经用户主动选择不安装第三方插件。
 
 本仓库与 DNF/Godot/传奇项目完全隔离。
 
