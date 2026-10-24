@@ -25,6 +25,35 @@ class MobileUxTests(unittest.TestCase):
         home = (ROOT / "WishCodeHomeActivity.java").read_text(encoding="utf-8")
         self.assertIn("WishCodePreviewEntry.open(this, null)", home)
 
+    def test_contextual_preview_not_a_persistent_nav(self):
+        source = (ROOT / "wishcode-mobile.js").read_text(encoding="utf-8")
+        activity = (ROOT / "WishCodePreviewActivity.java").read_text(encoding="utf-8")
+        self.assertIn("function previewCandidate(raw)", source)
+        self.assertIn("link.closest('[data-chat-flow]')", source)
+        self.assertIn("本地网页链接 · 尚未验证服务", source)
+        self.assertIn("wishcode-local-artifact-open", source)
+        self.assertIn("DOMContentLoaded", source)
+        self.assertIn("MutationObserver", source)
+        self.assertIn("decorated = new WeakSet()", source)
+        self.assertIn("button.textContent = '预览网页'", source)
+        self.assertIn("button.target = '_self'", source)
+        self.assertNotIn("window.location =", source)
+        self.assertNotIn("fetch(", source)
+        self.assertIn('putExtra("from_chat_link", candidate != null)', ENTRY)
+        self.assertIn('getBooleanExtra("from_chat_link", false)', activity)
+        self.assertIn('WishCodePreviewPolicy.normalize(candidate, chatPort) != null', activity)
+        self.assertIn('if (state == null &&', activity)
+        self.assertIn('approve();', activity)
+
+    def test_contextual_preview_node_smoke(self):
+        import shutil
+        import subprocess
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("Node.js unavailable; this is not a passing JS runtime test")
+        subprocess.run([node, str(ROOT / "test_contextual_preview.cjs")],
+                       cwd=ROOT.parent, check=True, timeout=25)
+
     def test_model_popover_only_is_constrained(self):
         # Verified upstream shape: model menu is portaled to body, role=group,
         # whereas reasoning effort uses role=menu.
