@@ -57,6 +57,17 @@ EXPECTED = {
     "app/src/main/java/com/deepseekharness/app/ui/OnboardingUi.java": [
         ('TextView brand = text("DSHA", 18, R.color.text);',
          'TextView brand = text("许愿编程", 18, R.color.text);'),
+        ('brand.setTypeface(null, android.graphics.Typeface.BOLD);',
+         'brand.setTypeface(brand.getTypeface(), android.graphics.Typeface.BOLD);'),
+        ('heading.setTypeface(null, android.graphics.Typeface.BOLD);',
+         'heading.setTypeface(heading.getTypeface(), android.graphics.Typeface.BOLD);'),
+        ('t.setIncludeFontPadding(false);',
+         't.setIncludeFontPadding(true);\n    t.setFallbackLineSpacing(true);\n'
+         '    t.setLineSpacing(dp(6), 1.12f);'),
+        ('b.setMinHeight(dp(48));',
+         'b.setMinHeight(dp(64));\n    b.setIncludeFontPadding(true);\n'
+         '    b.setFallbackLineSpacing(true);\n    b.setSingleLine(false);\n'
+         '    b.setMaxLines(4);\n    b.setLineSpacing(dp(6), 1.12f);'),
     ],
     "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java": [
         ('''        + read(context, "web-integration/page.js")
