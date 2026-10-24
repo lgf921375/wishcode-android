@@ -163,6 +163,24 @@ class PatchTests(unittest.TestCase):
         self.assertNotIn('font-family:', js)
         self.assertNotIn('font-size:', js)
 
+    def test_github_search_plugin_is_opt_in_and_pinned(self):
+        self.assertIn("GitHub 搜索与源码研究", HOME)
+        self.assertIn("showGitHubHelp", HOME)
+        self.assertIn("openGithubPluginInstaller", HOME)
+        self.assertIn("dsh-plugin-github-0.1.6.tgz", HOME)
+        self.assertIn(
+            "cb76ddc1fd02d71dea02bfede0ecc9137877ef1b5c31ac8ca011fe9b1dcf5db3", HOME
+        )
+        self.assertIn('appendQueryParameter("sha256", GITHUB_PLUGIN_SHA)', HOME)
+        self.assertIn('appendQueryParameter("version", "0.1.6")', HOME)
+        self.assertIn("未在本机 DSH 0.2.1-rc.2 上验证兼容性", HOME)
+        self.assertIn("github_search", HOME)
+        self.assertIn("github_get", HOME)
+        self.assertIn("它不提供克隆、推送或写入操作", HOME)
+        # The user must explicitly open the dialog and approve install.
+        start = HOME.split("protected void onCreate", 1)[1].split("private void openWeb", 1)[0]
+        self.assertNotIn("openGithubPluginInstaller()", start)
+
     def test_app_identity_is_separate(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
