@@ -1,10 +1,10 @@
-name: WishCode V0.3 Android APK - Manual
+name: WishCode V0.4 Android APK - Manual
 on:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: wishcode-v03-manual
+  group: wishcode-v04-manual
   cancel-in-progress: false
 
 jobs:
@@ -102,7 +102,7 @@ jobs:
           print('Pinned source extracted:', src)
           PY
 
-      - name: Apply WishCode V0.3 adaptation
+      - name: Apply WishCode V0.4 mobile adaptation
         env:
           SOURCE: ${{ steps.source.outputs.source }}
         run: |
@@ -176,21 +176,21 @@ jobs:
           fi
           apk=$(find "$SOURCE/app/build/outputs/apk" \
              -path '*/standard/debug/*' -name '*.apk' -type f | head -1)
-          cp "$apk" dist/WishCode-v0.3-arm64-debug.apk
+          cp "$apk" dist/WishCode-v0.4-arm64-debug.apk
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
-             --verbose dist/WishCode-v0.3-arm64-debug.apk
+             --verbose dist/WishCode-v0.4-arm64-debug.apk
           package=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
-             dist/WishCode-v0.3-arm64-debug.apk | sed -n \
+             dist/WishCode-v0.4-arm64-debug.apk | sed -n \
              "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
-          test "$package" = "app.wishcode.harnessmobile"
-          unzip -t dist/WishCode-v0.3-arm64-debug.apk >/dev/null
-          sha256sum dist/WishCode-v0.3-arm64-debug.apk > dist/SHA256SUMS.txt
+          test "$package" = "app.wishcode.harnessmobile.v04"
+          unzip -t dist/WishCode-v0.4-arm64-debug.apk >/dev/null
+          sha256sum dist/WishCode-v0.4-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
 
       - name: Upload verified, signed test APK
         uses: actions/upload-artifact@v4
         with:
-          name: WishCode-V0.3-Android-APK
+          name: WishCode-V0.4-Android-APK
           path: dist/
           if-no-files-found: error
           retention-days: 7
