@@ -110,6 +110,29 @@ class PatchTests(unittest.TestCase):
             source = (root / "app/src/main/java/com/deepseekharness/app/ui/WebPageScripts.java").read_text()
             self.assertIn('read(context, "web-integration/wishcode-mobile.js")', source)
 
+    def test_coloros_pinyin_system_font_is_preserved(self):
+        self.assertNotIn('Typeface.create("sans-serif"', HOME)
+        self.assertIn('label.getTypeface()', HOME)
+        self.assertIn('label.setIncludeFontPadding(true)', HOME)
+        self.assertIn('label.setFallbackLineSpacing(true)', HOME)
+        self.assertIn('label.setLineSpacing(', HOME)
+        self.assertIn('button.setSingleLine(false)', HOME)
+        self.assertIn('button.setMaxLines(4)', HOME)
+        self.assertIn('button.setFallbackLineSpacing(true)', HOME)
+        self.assertIn('button.setLineSpacing(', HOME)
+        self.assertIn('LayoutParams.WRAP_CONTENT', HOME)
+
+    def test_pinyin_web_typography_preserves_font_and_text_visibility(self):
+        js = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
+        self.assertIn('line-height: 1.9 !important', js)
+        self.assertIn('overflow-wrap: break-word', js)
+        self.assertIn('overflow-y: auto', js)
+        self.assertIn('height: auto !important', js)
+        self.assertIn('overflow-x: auto', js)
+        self.assertNotIn('overflow-x: clip', js)
+        self.assertNotIn('font-family:', js)
+        self.assertNotIn('font-size:', js)
+
     def test_app_identity_is_separate(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
