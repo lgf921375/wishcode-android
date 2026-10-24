@@ -165,6 +165,14 @@ EXPECTED = {
          '  void requestAutoEnterWeb(boolean autoStart) {\n'
          '    pendingWishcodeStart = autoStart;\n'
          '    pendingAutoEnter = true;'),
+        ('          startRequest.incrementAndGet();\n'
+         '          preparingStart = false;\n'
+         '          FirstRunWebStart.cancel(requireContext());',
+         '          startRequest.incrementAndGet();\n'
+         '          pendingAutoEnter = false;\n'
+         '          pendingWishcodeStart = false;\n'
+         '          preparingStart = false;\n'
+         '          FirstRunWebStart.cancel(requireContext());'),
         ('    // 页面不可见时撤销自动进入：用户离开了启动页，回来不该被"突袭"打开 Web。\n'
          '    pendingAutoEnter = false;',
          '    // 页面不可见时撤销自动进入：用户离开了启动页，回来不该被"突袭"打开 Web。\n'
