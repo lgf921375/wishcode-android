@@ -66,3 +66,12 @@
 - 返回/后台切换、旋转屏幕、原生标题打开高级首页，仍可调整 API/插件与读取日志；
 - **保留 ColorOS 拼音字体和现有工作区/模型凭据，不要求重装或抹数据**。
 - **当前手机已装 APK 不包含上述新补丁**。合并执行分支后须在用户明确授权下手动构建，不允许自动触发/自动重试，不能用静态测试替代实机判定。
+
+
+## 构建前安全复核（追加）
+
+- 已核实上游 `BrowserTasks.resumeBackground(context,true)` 可在后台聊天任务仍活跃时恢复原任务。桌面启动先尝试此路由，成功直接返回当前会话，不创建新的 Main/Web 宿主；失败才走正常可见启动页与鉴权等待。多任务/系统回收状态仍需实机验证。
+- **纠正停止状态判断**：单纯 `!controller.isUserStopped()` 只反映本进程内的状态，不能保证重启进程后用户手动 Stop 的 sentinel 仍受保护。现将冷启动自动发起保护性 Web 启动的前提改为上游 `controller.canAutoRestart()`，该函数明确检查 `hasStopSentinel()`、恢复状态及运行代次。不能因为桌面图标打开就无视显式停止。
+- GitHub 手动 APK 工作流加了 Node 脚本检查：`node --check scripts/wishcode-mobile.js`、`node --check scripts/test_contextual_preview.cjs`、`node scripts/test_contextual_preview.cjs`，全都在 Android 构建前执行，任何失败则终止该次构建。
+- 在独立 V8 环境复用模拟 DOM 案例实际执行：合法本机链接 3 次上下文呈现、7 次恶意候选拒绝、流式 DOM 重复扫描幂等 **PASS**（测试环境提供简化 URL 模拟器；并非 Node/Android 真机结果）。
+- 当前本会话容器无法解析 github.com，无法克隆当前 GitHub 分支执行完整 Python/Node/Android 构建。尚未触发 Actions；在得到用户“一次手动构建”授权之前不得创建可收费构建任务、不得重试。
