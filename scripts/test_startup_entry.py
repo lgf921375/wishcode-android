@@ -13,6 +13,9 @@ class StartupEntryTests(unittest.TestCase):
         self.assertIn('.putExtra("open_web", true)', HOME)
         self.assertIn('.putExtra("wishcode_auto_start_web", true)', HOME)
         self.assertIn('finish();\n      return;', HOME)
+        self.assertIn('BrowserTasks.resumeBackground(this, true)', HOME)
+        self.assertLess(HOME.index('BrowserTasks.resumeBackground(this, true)'),
+                        HOME.index('startActivity(new Intent(this, MainActivity.class)'))
         self.assertIn('public final class WishCodeHomeActivity', HOME)
         self.assertIn('action(content, "诊断与日志"', HOME)
 
