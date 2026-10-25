@@ -9,9 +9,9 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from release_config import APP_ID, VERSION_CODE, VERSION_NAME
 
 BASE = "DSH-APP/DSHA@c750348a4d4b18edcb165a93b4ca66403b040b4c"
-APP_ID = "app.wishcode.harnessmobile.v05trial2"
 HOME_PATH = "app/src/main/java/com/deepseekharness/app/ui/WishCodeHomeActivity.java"
 MOBILE_PATH = "app/src/main/assets/web-integration/wishcode-mobile.js"
 MAIN_MANIFEST = '''        <activity
@@ -50,9 +50,9 @@ EXPECTED = {
     ],
     "app/build.gradle": [
         ('applicationId "dsh.android.client"', f'applicationId "{APP_ID}"'),
-        ('versionCode 190', 'versionCode 192'),
+        ('versionCode 190', f'versionCode {VERSION_CODE}'),
         ('versionName "0.2.1-rc.2-20261022.2100-dsh0.2.1-rc.2"',
-         'versionName "0.5-preview-002-dsh0.2.1-rc.2"'),
+         f'versionName "{VERSION_NAME}"'),
     ],
     "app/src/main/res/values/strings.xml": [
         ('<string name="app_name" translatable="false">DSHA</string>',
