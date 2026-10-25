@@ -1,4 +1,4 @@
-name: WishCode V0.5 Preview 002 Android APK - Manual
+name: WishCode V0.5 Preview 003 NoGLM Android APK - Manual
 on:
   workflow_dispatch:
 permissions:
@@ -32,22 +32,19 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_*.py' -v
-          python3 -m py_compile scripts/customize.py scripts/pin_linux_aapt2.py
+          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
         with:
           node-version: '24'
 
-      - name: Test phone model chooser and contextual HTML preview (no network)
+      - name: Test mobile model menu and retired preview regression (no network)
         run: |
           set -euo pipefail
           node --check scripts/wishcode-mobile.js
           node --check scripts/test_contextual_preview.cjs
           node scripts/test_contextual_preview.cjs
-
-      - name: Test GLM streaming protocol (no API requests)
-        run: node --test tests/glm.test.mjs
 
       - name: Locate Android SDK from runner installation
         shell: bash
@@ -112,7 +109,7 @@ jobs:
           print('Pinned source extracted:', src)
           PY
 
-      - name: Apply WishCode V0.5 Preview mobile adaptation
+      - name: Apply WishCode V0.5 Preview 003 mobile adaptation
         env:
           SOURCE: ${{ steps.source.outputs.source }}
         run: |
@@ -120,7 +117,6 @@ jobs:
           python3 scripts/customize.py "$SOURCE" \
             --template scripts/WishCodeHomeActivity.java \
             --report "$SOURCE/wishcode-patch-report.json"
-          python3 scripts/install_glm.py "$SOURCE"
 
       - name: Resolve tool versions from exact upstream source
         id: toolchain
@@ -187,22 +183,31 @@ jobs:
           fi
           apk=$(find "$SOURCE/app/build/outputs/apk" \
              -path '*/standard/debug/*' -name '*.apk' -type f | head -1)
-          cp "$apk" dist/WishCode-v0.5-preview-002-arm64-debug.apk
+          cp "$apk" dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
-             --verbose --print-certs dist/WishCode-v0.5-preview-002-arm64-debug.apk | tee dist/signature-report.txt
-          package=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
-             dist/WishCode-v0.5-preview-002-arm64-debug.apk | sed -n \
+             --verbose --print-certs dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk | tee dist/signature-report.txt
+          badging=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
+             dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk)
+          package=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
-          test "$package" = "app.wishcode.harnessmobile.v05trial2"
-          unzip -t dist/WishCode-v0.5-preview-002-arm64-debug.apk >/dev/null
-          sha256sum dist/WishCode-v0.5-preview-002-arm64-debug.apk > dist/SHA256SUMS.txt
+          version_code=$(printf '%s\n' "$badging" | sed -n \
+             "s/^package: .*versionCode='\([^']*\)'.*/\1/p" | head -1)
+          version_name=$(printf '%s\n' "$badging" | sed -n \
+             "s/^package: .*versionName='\([^']*\)'.*/\1/p" | head -1)
+          test "$package" = "app.wishcode.harnessmobile.v05trial3"
+          test "$version_code" = "193"
+          test "$version_name" = "0.5-preview-003-dsh0.2.1-rc.2"
+          printf 'Verified package=%s versionCode=%s versionName=%s\n' \
+             "$package" "$version_code" "$version_name" | tee dist/package-version-report.txt
+          unzip -t dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk >/dev/null
+          sha256sum dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
           git rev-parse HEAD > dist/source-commit.txt
 
       - name: Upload verified, signed test APK
         uses: actions/upload-artifact@v4
         with:
-          name: WishCode-V0.5-Preview-002-Android-APK
+          name: WishCode-V0.5-Preview-003-NoGLM-Android-APK
           path: dist/
           if-no-files-found: error
           retention-days: 7

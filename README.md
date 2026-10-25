@@ -1,4 +1,6 @@
-> GLM-5.3 API / Coding Plan 源码已接入，尚待单独授权编译及真机验收。已成功构建的 #7 预览 APK 不含 GLM。详见 [GLM 交付记录](docs/glm53-handoff.md)。
+> **当前交付候选（2026-10-25）**：WishCode **V0.5 Preview 003 NoGLM**，固定上游 DSHA `v0.2.1-rc.2`，Android 包名 `app.wishcode.harnessmobile.v05trial3`、versionCode `193`、versionName `0.5-preview-003-dsh0.2.1-rc.2`。**已移除 GLM 专项预装以及额外受限预览器**，保留上游原生浏览器。唯一构建分支为 `build/wishcode-v05-preview003-noglm-manual-20261025-de71a756`。当前候选尚需真实测试和手动 APK 构建，**未验证成功**。详见 [NoGLM 交接](docs/preview003-no-glm-release-20261025.md)。
+>
+> 下文早期有关 GLM 接入、独立网页预览器及旧 APK 的说明均为**历史开发记录**，不能作为本版打包内容或构建状态的依据。
 
 # 许愿编程 V0.5 · APP 内 HTML 预览候选
 

@@ -32,8 +32,16 @@ class PreviewTests(unittest.TestCase):
                          'request.deny()', 'Content-Security-Policy', 'onRenderProcessGone']:
             self.assertIn(required, source)
         patch = (ROOT / 'scripts/customize.py').read_text()
-        self.assertIn('android:process=":wishcode_preview"', patch)
-        self.assertIn('setDataDirectorySuffix', patch)
+        # Historical preview sources remain in Git for audit, but none may be
+        # injected into the new APK or intercept the upstream browser.
+        self.assertNotIn('android:process=":wishcode_preview"', patch)
+        self.assertNotIn("WishCodePreviewActivity", patch)
+        self.assertNotIn("WishCodePreviewEntry", patch)
+        self.assertNotIn("WishCodePreviewPolicy", patch)
+        self.assertNotIn("WebPreviewActivity.java", patch)
+        self.assertIn('android:name=".ui.MainActivity"', patch)
+        # The retired extra-process WebView must not be installed by this patch.
+        self.assertNotIn('setDataDirectorySuffix', patch)
 
 if __name__ == '__main__':
     unittest.main()
