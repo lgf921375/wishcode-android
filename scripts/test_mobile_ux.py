@@ -19,7 +19,9 @@ class MobileUxTests(unittest.TestCase):
         self.assertNotIn("function previewCandidate(", STYLES)
         self.assertNotIn("MutationObserver", STYLES)
         self.assertIn("开始聊天编程", home)
-        self.assertIn("GLM-5.3 · API / 套餐设置", home)
+        self.assertNotIn("GLM-5.3", home)
+        self.assertNotIn("WishCodeGlmSettings", home)
+        self.assertIn("设置 → 模型", home)
         self.assertIn("项目文件", home)
         self.assertIn("插件管理", home)
 
