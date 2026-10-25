@@ -28,18 +28,11 @@ public final class WishCodePreviewEntry {
   }
 
   public static void open(Activity host, String candidate) {
-    // 只传当前工作台端口，不传 auth URL、Cookie、令牌或工作区文件。
-    var identity = com.deepseekharness.app.core.HarnessController.get(host).getReadyWebPageIdentity();
-    int chatPort = identity == null ? -1 : WishCodePreviewPolicy.port(identity.authUrl());
-    if (chatPort < 1) {
-      new DshaDialogBuilder(host).setTitle("请先进入聊天工作台")
-          .setMessage("需要核对当前工作台端口，防止把聊天服务当成开发网页。")
-          .setPositiveButton("知道了", null).show();
-      return;
-    }
-    host.startActivity(new Intent(host, WishCodePreviewActivity.class)
-        .putExtra("chat_port", chatPort).putExtra("candidate", candidate)
-        .putExtra("from_chat_link", candidate != null));
+    // Retired at user's request: never open the limited isolated WebView.
+    // Keep the symbol so legacy callers cannot accidentally open it.
+    new DshaDialogBuilder(host).setTitle("旧网页预览已停用")
+        .setMessage("该预览器不兼容部分游戏和跨站网页。请返回聊天，使用常规浏览器或项目工具进行测试。")
+        .setPositiveButton("知道了", null).show();
   }
 
 }
