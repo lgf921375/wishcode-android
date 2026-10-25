@@ -40,7 +40,8 @@ class PreviewTests(unittest.TestCase):
         self.assertNotIn("WishCodePreviewPolicy", patch)
         self.assertNotIn("WebPreviewActivity.java", patch)
         self.assertIn('android:name=".ui.MainActivity"', patch)
-        self.assertIn('setDataDirectorySuffix', patch)
+        # The retired extra-process WebView must not be installed by this patch.
+        self.assertNotIn('setDataDirectorySuffix', patch)
 
 if __name__ == '__main__':
     unittest.main()
