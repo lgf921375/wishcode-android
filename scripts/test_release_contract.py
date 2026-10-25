@@ -14,25 +14,32 @@ def module(name):
 
 release = module("release_config")
 patch = module("customize")
-glm = (HERE / "install_glm.py").read_text(encoding="utf-8")
 workflow = (REPO / ".github/workflows/build-custom-apk.yml").read_text(encoding="utf-8")
 mobile = (HERE / "wishcode-mobile.js").read_text(encoding="utf-8")
 home = (HERE / "WishCodeHomeActivity.java").read_text(encoding="utf-8")
 
 
 class ReleaseIntegrityTests(unittest.TestCase):
-    def test_one_release_identity_shared_between_build_and_glm(self):
+    def test_one_release_identity_and_no_forced_glm(self):
         self.assertEqual(patch.APP_ID, release.APP_ID)
         gradle = str(patch.EXPECTED["app/build.gradle"])
         self.assertIn(f'versionCode {release.VERSION_CODE}', gradle)
         self.assertIn(release.VERSION_NAME, gradle)
-        for name in ["APP_ID", "VERSION_CODE", "VERSION_NAME", "GLM_VERSION_NAME"]:
-            self.assertIn(name, glm)
         self.assertIn(f'test "$package" = "{release.APP_ID}"', workflow)
         self.assertIn(release.APK_NAME, workflow)
         self.assertIn(release.ARTIFACT_NAME, workflow)
-        self.assertIn("versionName", glm)
-        self.assertNotEqual(release.VERSION_NAME, release.GLM_VERSION_NAME)
+        self.assertNotIn("GLM_VERSION_NAME", release.__dict__)
+        self.assertNotIn("install_glm", workflow)
+        self.assertNotIn("glm.test.mjs", workflow)
+        self.assertNotIn("WishCodeGlmSettings", home)
+        self.assertNotIn("GLM-5.3", home)
+        self.assertIn("设置 → 模型", home)
+
+    def test_no_glm_builtin_in_new_source_tree(self):
+        self.assertFalse((HERE / "install_glm.py").exists())
+        self.assertFalse((HERE / "WishCodeGlmSettings.java").exists())
+        self.assertFalse((REPO / "plugins/dsh-wishcode-glm").exists())
+        self.assertFalse((REPO / "tests/glm.test.mjs").exists())
 
     def test_signed_debug_app_is_separate_from_previous_install(self):
         self.assertNotEqual(release.APP_ID, "app.wishcode.harnessmobile.v05trial2")
