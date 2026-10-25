@@ -125,7 +125,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     scroll.addView(content);
     setContentView(scroll);
 
-    addText(content, text("许愿编程 · 预览测试版", 26, R.color.text, true), 0, 3);
+    addText(content, text("许愿编程 · V0.5 测试版003", 26, R.color.text, true), 0, 3);
     addText(content, text("像聊天一样编程 · 工具调用仍由 DSH 执行", 13,
         R.color.text_secondary, false), 0, 18);
 
@@ -138,8 +138,6 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     action(content, "GLM-5.3 · API / 套餐设置", false, () -> WishCodeGlmSettings.show(this));
 
     addText(content, text("工具", 19, R.color.text, true), 22, 0);
-    action(content, "预览网页 · HTML 实时交互", false,
-        () -> WishCodePreviewEntry.open(this, null));
     action(content, "项目文件", false,
         () -> startActivity(new Intent(this, WorkspaceFilesActivity.class)));
     action(content, "GitHub 搜索与源码研究", false, this::showGitHubHelp);

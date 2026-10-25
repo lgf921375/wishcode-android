@@ -3,6 +3,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+from release_config import APP_ID, VERSION_CODE, VERSION_NAME, GLM_VERSION_NAME
 
 def install(root):
     root = Path(root)
@@ -25,12 +26,14 @@ def install(root):
             contract['installs'].append(dict(asset=f'builtin-plugins/{name}/{relative}',target=f'root/dsha-wishcode-glm/{relative}',executable=False))
     gradle = root / 'app/build.gradle'
     build = gradle.read_text()
-    # Customize V0.5 Preview 002 has already pinned versionCode 192.
-    # Stage GLM without changing the package's versionCode a second time.
-    code = 'versionCode 192'
-    before_version = 'versionName "0.5-preview-002-dsh0.2.1-rc.2"'
-    after_version = 'versionName "0.5-preview-002-glm53-dsh0.2.1-rc.2"'
-    if build.count(code) != 1 or build.count(before_version) != 1:
+    # Do not increment versionCode: the Android adaptation already owns it.
+    # Check the exact app identity and version before staging the GLM plugin.
+    code = f'versionCode {VERSION_CODE}'
+    identity = f'applicationId "{APP_ID}"'
+    before_version = f'versionName "{VERSION_NAME}"'
+    after_version = f'versionName "{GLM_VERSION_NAME}"'
+    if (build.count(code) != 1 or build.count(identity) != 1
+            or build.count(before_version) != 1):
         raise ValueError('GLM_VERSION_DRIFT')
     gradle.write_text(build.replace(before_version, after_version, 1))
     shutil.copytree(plugin,target)
