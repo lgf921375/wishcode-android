@@ -23,11 +23,7 @@ MAIN_MANIFEST = '''        <activity
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>'''
-NEW_MANIFEST = '''        <activity android:name=".ui.WishCodePreviewActivity"
-            android:exported="false" android:process=":wishcode_preview"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
+NEW_MANIFEST = '''        <activity
             android:name=".ui.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -40,14 +36,6 @@ NEW_MANIFEST = '''        <activity android:name=".ui.WishCodePreviewActivity"
         </activity>'''
 
 EXPECTED = {
-    "app/src/main/java/com/deepseekharness/app/DshaApp.java": [
-        ('    super.onCreate();',
-         '    super.onCreate();\n'
-         '    if (android.app.Application.getProcessName().endsWith(":wishcode_preview")) {\n'
-         '      android.webkit.WebView.setDataDirectorySuffix("wishcode_developer_preview");\n'
-         '      return; // 不初始化工作台、桥、备份或运行时服务。\n'
-         '    }'),
-    ],
     "app/build.gradle": [
         ('applicationId "dsh.android.client"', f'applicationId "{APP_ID}"'),
         ('versionCode 190', f'versionCode {VERSION_CODE}'),
@@ -233,18 +221,6 @@ def modify(root: Path, home_template: str) -> dict:
     if "wishcode-mobile-v04" not in mobile_template or "data-composer-input" not in mobile_template:
         raise RuntimeError("STOP: unexpected mobile stylesheet asset")
 
-    for name, package in [("WishCodePreviewActivity", "ui"),
-                          ("WishCodePreviewEntry", "ui"), ("WishCodePreviewPolicy", "util"),
-                          ("WishCodePreviewHttp", "util")]:
-        relative = f"app/src/main/java/com/deepseekharness/app/{package}/{name}.java"
-        path = root / relative
-        if path.exists():
-            raise RuntimeError(f"STOP: preview source already exists: {relative}")
-        source = Path(__file__).with_name(name + ".java").read_text(encoding="utf-8")
-        if f"public final class {name}" not in source:
-            raise RuntimeError(f"STOP: unexpected preview source: {name}")
-        pending[path] = source
-        changes.append({"path": relative, "before": None, "after": sha(source)})
 
     store = pending[root / "app/src/main/java/com/deepseekharness/app/core/ConfigStore.java"]
     if 'return flag(Constants.KEY_CONFIRM_SHELL, true);' not in store:
