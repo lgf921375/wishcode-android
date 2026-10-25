@@ -186,10 +186,19 @@ jobs:
           cp "$apk" dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
              --verbose --print-certs dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk | tee dist/signature-report.txt
-          package=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
-             dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk | sed -n \
+          badging=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
+             dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk)
+          package=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
+          version_code=$(printf '%s\n' "$badging" | sed -n \
+             "s/^package: .*versionCode='\([^']*\)'.*/\1/p" | head -1)
+          version_name=$(printf '%s\n' "$badging" | sed -n \
+             "s/^package: .*versionName='\([^']*\)'.*/\1/p" | head -1)
           test "$package" = "app.wishcode.harnessmobile.v05trial3"
+          test "$version_code" = "193"
+          test "$version_name" = "0.5-preview-003-dsh0.2.1-rc.2"
+          printf 'Verified package=%s versionCode=%s versionName=%s\n' \
+             "$package" "$version_code" "$version_name" | tee dist/package-version-report.txt
           unzip -t dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk >/dev/null
           sha256sum dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
