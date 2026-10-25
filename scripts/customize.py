@@ -48,13 +48,6 @@ EXPECTED = {
          '      return; // 不初始化工作台、桥、备份或运行时服务。\n'
          '    }'),
     ],
-    "app/src/main/java/com/deepseekharness/app/ui/WebPreviewActivity.java": [
-        ('      if (request.hasGesture()\n',
-         '      if (request.hasGesture() && com.deepseekharness.app.util.WishCodePreviewPolicy.normalize(url,\n'
-         '          com.deepseekharness.app.util.WishCodePreviewPolicy.port(baseUrl)) != null) {\n'
-         '        WishCodePreviewEntry.open(WebPreviewActivity.this, url); return true;\n'
-         '      }\n      if (request.hasGesture()\n'),
-    ],
     "app/build.gradle": [
         ('applicationId "dsh.android.client"', f'applicationId "{APP_ID}"'),
         ('versionCode 190', 'versionCode 192'),
