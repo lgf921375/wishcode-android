@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_*.py' -v
-          python3 -m py_compile scripts/customize.py scripts/install_glm.py scripts/release_config.py scripts/pin_linux_aapt2.py
+          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
@@ -45,9 +45,6 @@ jobs:
           node --check scripts/wishcode-mobile.js
           node --check scripts/test_contextual_preview.cjs
           node scripts/test_contextual_preview.cjs
-
-      - name: Test GLM streaming protocol (no API requests)
-        run: node --test tests/glm.test.mjs
 
       - name: Locate Android SDK from runner installation
         shell: bash
@@ -120,7 +117,6 @@ jobs:
           python3 scripts/customize.py "$SOURCE" \
             --template scripts/WishCodeHomeActivity.java \
             --report "$SOURCE/wishcode-patch-report.json"
-          python3 scripts/install_glm.py "$SOURCE"
 
       - name: Resolve tool versions from exact upstream source
         id: toolchain
