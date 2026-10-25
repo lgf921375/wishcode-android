@@ -4,17 +4,18 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase, mock
+from release_config import APP_ID, VERSION_CODE, VERSION_NAME, GLM_VERSION_NAME
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("install_glm", HERE / "install_glm.py")
 glm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(glm)
 
-OLD_VERSION = 'versionName "0.5-preview-002-dsh0.2.1-rc.2"'
-GLM_VERSION = 'versionName "0.5-preview-002-glm53-dsh0.2.1-rc.2"'
+OLD_VERSION = f'versionName "{VERSION_NAME}"'
+GLM_VERSION = f'versionName "{GLM_VERSION_NAME}"'
 
 
-def build_fixture(root, code=192, version=OLD_VERSION):
+def build_fixture(root, code=VERSION_CODE, version=OLD_VERSION):
     assets = root / "app/src/main/assets"
     assets.mkdir(parents=True)
     ui = root / "app/src/main/java/com/deepseekharness/app/ui"
@@ -25,7 +26,7 @@ def build_fixture(root, code=192, version=OLD_VERSION):
         json.dumps({"schema": 1, "installs": []}), encoding="utf-8")
     gradle = root / "app/build.gradle"
     gradle.write_text(
-        f'android {{\n applicationId "app.wishcode.harnessmobile.v05trial2"\n'
+        f'android {{\n applicationId "{APP_ID}"\n'
         f' versionCode {code}\n {version}\n}}\n', encoding="utf-8")
     return assets, gradle
 
@@ -38,10 +39,10 @@ class GlmStageTests(TestCase):
             with mock.patch.object(glm.subprocess, "run") as generator:
                 glm.install(root)
             generator.assert_called_once()
-            self.assertEqual(gradle.read_text().count("versionCode 192"), 1)
+            self.assertEqual(gradle.read_text().count(f"versionCode {VERSION_CODE}"), 1)
             self.assertEqual(gradle.read_text().count(GLM_VERSION), 1)
             self.assertNotIn(OLD_VERSION, gradle.read_text())
-            self.assertIn("app.wishcode.harnessmobile.v05trial2", gradle.read_text())
+            self.assertIn(APP_ID, gradle.read_text())
             registry = json.loads((assets / "builtin-plugins.json").read_text())
             self.assertEqual([p["name"] for p in registry["plugins"]],
                              ["dsh-wishcode-glm"])
@@ -58,7 +59,7 @@ class GlmStageTests(TestCase):
         with TemporaryDirectory() as td:
             root = Path(td)
             assets, gradle = build_fixture(
-                root, code=191, version='versionName "0.5-preview-001-dsh0.2.1-rc.2"')
+                root, code=192, version='versionName "0.5-preview-002-dsh0.2.1-rc.2"')
             before = gradle.read_text()
             with mock.patch.object(glm.subprocess, "run") as generator:
                 with self.assertRaisesRegex(ValueError, "GLM_VERSION_DRIFT"):
@@ -73,7 +74,7 @@ class GlmStageTests(TestCase):
         with TemporaryDirectory() as td:
             root = Path(td)
             assets, gradle = build_fixture(
-                root, code=192, version='versionName "0.5-preview-003-dsh0.2.1-rc.2"')
+                root, code=193, version='versionName "0.5-preview-004-dsh0.2.1-rc.2"')
             original = gradle.read_text()
             with mock.patch.object(glm.subprocess, "run") as generator:
                 with self.assertRaisesRegex(ValueError, "GLM_VERSION_DRIFT"):
