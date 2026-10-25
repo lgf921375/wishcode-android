@@ -125,7 +125,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     scroll.addView(content);
     setContentView(scroll);
 
-    addText(content, text("许愿编程 · 手机测试版", 26, R.color.text, true), 0, 3);
+    addText(content, text("许愿编程 · V0.5 测试版003", 26, R.color.text, true), 0, 3);
     addText(content, text("像聊天一样编程 · 工具调用仍由 DSH 执行", 13,
         R.color.text_secondary, false), 0, 18);
 
