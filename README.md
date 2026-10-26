@@ -1,3 +1,5 @@
+> **2026-10-26 最新开发候选：WishCode V0.5 Preview 004 ArmorCompat（未编译/未实机验证）。** 在独立分支 `work/wishcode-armor-compat-001-20261026` 上，沿用 Preview 003 NoGLM，新增可手动导出的 `dsh-purge-flash` 1.4.0 固定源码兼容包，仅修正 `armor-playbook` 注册缺失的字符串 `source`；无自动安装、无自动构建、不会覆盖旧 APK。详见 [完整交接](docs/armor-compat-preview004-20261026.md)。
+
 > **当前交付候选（2026-10-25）**：WishCode **V0.5 Preview 003 NoGLM**，固定上游 DSHA `v0.2.1-rc.2`，Android 包名 `app.wishcode.harnessmobile.v05trial3`、versionCode `193`、versionName `0.5-preview-003-dsh0.2.1-rc.2`。**已移除 GLM 专项预装以及额外受限预览器**，保留上游原生浏览器。唯一构建分支为 `build/wishcode-v05-preview003-noglm-manual-20261025-de71a756`。当前候选尚需真实测试和手动 APK 构建，**未验证成功**。详见 [NoGLM 交接](docs/preview003-no-glm-release-20261025.md)。
 >
 > 下文早期有关 GLM 接入、独立网页预览器及旧 APK 的说明均为**历史开发记录**，不能作为本版打包内容或构建状态的依据。
