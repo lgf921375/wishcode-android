@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_*.py' -v
-          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py
+          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py scripts/prepare_purge_flash.py scripts/prepare_dnf_dev.py
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
@@ -136,6 +136,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/armor-validation"
           tar -xzf "$archive" -C "$RUNNER_TEMP/armor-validation"
           node --check "$RUNNER_TEMP/armor-validation/package/lib/skills.js"
+          node --check "$RUNNER_TEMP/armor-validation/package/lib/index.js"
+          grep -Fq 'export const inject = ["systemPrompt", "skills"];' \
+            "$RUNNER_TEMP/armor-validation/package/lib/index.js"
           # Load the actual pinned module with a strict minimal host skill contract.
           # Do not run untrusted third-party npm lifecycle scripts or make API calls.
           (
