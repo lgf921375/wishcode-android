@@ -17,7 +17,6 @@ class LexicalInputOverlayTests(unittest.TestCase):
         self.assertIn('context.claimDispatch()',code)
         self.assertIn('context.target().packageName',code)
         self.assertIn('BuildConfig.APPLICATION_ID',code)
-        self.assertIn("root.root.findFocus", (m.NATIVE + " root.root.findFocus"))
         self.assertIn('if (lexical != null) return lexical;',code)
         self.assertIn('return semanticOutcome(context, target.performAction(action, bundle), action);',code)
         self.assertIn('grant.current()',code)
