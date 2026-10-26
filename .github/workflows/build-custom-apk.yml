@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_*.py' -v
-          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py scripts/prepare_purge_flash.py scripts/prepare_dnf_dev.py
+          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py scripts/prepare_purge_flash.py scripts/prepare_dnf_dev.py scripts/register_wishcode_assets.py
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
@@ -206,6 +206,32 @@ jobs:
           )
           test -s "$SOURCE/dnf-dev-report.json"
 
+      - name: Register two plugin archives in DSHA's strict asset manifest
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/register_wishcode_assets.py "$SOURCE" \
+            --armor-report "$SOURCE/armor-compat-report.json" \
+            --dnf-report "$SOURCE/dnf-dev-report.json" \
+            --output "$SOURCE/wishcode-asset-registration.json"
+          # Run the original DSHA guard before Gradle rather than bypassing it.
+          (
+            cd "$SOURCE"
+            python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path("tools").resolve()))
+          from asset_deployment import load_manifest, verify_reader_contracts
+          count = verify_reader_contracts(Path("app/src/main/assets"),
+                                          load_manifest(), repository=Path("."))
+          assert count > 0, "empty approved asset deployment"
+          print("PASS DSHA original asset reader/allowlist contract:", count)
+          PY
+          )
+          test -s "$SOURCE/wishcode-asset-registration.json"
+
       - name: Resolve tool versions from exact upstream source
         id: toolchain
         env:
@@ -292,6 +318,7 @@ jobs:
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
           cp "$SOURCE/armor-compat-report.json" dist/armor-compat-report.json
           cp "$SOURCE/dnf-dev-report.json" dist/dnf-dev-report.json
+          cp "$SOURCE/wishcode-asset-registration.json" dist/asset-registration-report.json
           cp "$SOURCE/app/src/main/assets/wishcode/dsh-wishcode-dnf-dev-0.1.0.tgz" \
             dist/dsh-wishcode-dnf-dev-0.1.0.tgz
           sha256sum dist/dsh-wishcode-dnf-dev-0.1.0.tgz \
