@@ -136,6 +136,31 @@ jobs:
           mkdir -p "$RUNNER_TEMP/armor-validation"
           tar -xzf "$archive" -C "$RUNNER_TEMP/armor-validation"
           node --check "$RUNNER_TEMP/armor-validation/package/lib/skills.js"
+          # Load the actual pinned module with a strict minimal host skill contract.
+          # Do not run untrusted third-party npm lifecycle scripts or make API calls.
+          (
+            cd "$RUNNER_TEMP/armor-validation/package"
+            node --input-type=module <<'JS'
+          import { installSkills } from "./lib/skills.js";
+          const state = { layers: {}, disposers: [] };
+          let calls = 0;
+          const ctx = { get(name) {
+            return name === "skills" ? { register(skill) {
+              calls++;
+              if (skill.name !== "armor-playbook" || skill.source !== "runtime" ||
+                  typeof skill.content !== "string" || !skill.content.trim()) {
+                throw new Error("invalid runtime skill registration");
+              }
+              return () => {};
+            }} : undefined;
+          }};
+          if (!installSkills(ctx, { playbook: true }, state) ||
+              state.layers.skills !== "on" || calls !== 1) {
+            throw new Error("armor-playbook compatibility smoke failed");
+          }
+          console.log("PASS armor-playbook runtime skill source:string");
+          JS
+          )
           test -s "$SOURCE/armor-compat-report.json"
 
       - name: Resolve tool versions from exact upstream source
