@@ -40,3 +40,19 @@ Implement a minimal **authorized, focused-only** route for the current native ap
 3. Standard physical screen and third-party apps must continue using existing accessibility `ACTION_SET_TEXT`. Never relax `STALE_FRAME`, scope, per-session authorizations, or blocked device shell policy.
 4. Publish exact branch SHA, static tests, Gradle logs, real APK and phone screenshots/dump. Until real phone test, mark FIX-CANDIDATE only.
 5. Build policy: workflow_dispatch only, do NOT change `main`, no automatic builds/retries/cloud fees.
+
+
+## Implementation candidate (same isolated branch, source-only)
+
+- Added `scripts/patch_lexical_input.py`: strict anchor patch of the upstream source ZIP's `ScreenActionExecutor.java`, `WebPreviewActivity.java`, and `app-integration/client.js`.
+- Native `/app/ui/input` only tries the Lexical path **after** original screen grant claim, focused node and window identity validation. Only active own-package browser can route to the Lexical service. Non-composer fields and other apps retain original platform behavior.
+- The guest service only accepts a focused contenteditable, the exact active retained session, plain editable phase and a revision-guarded `captureInsertion/insertText`. It never directly writes DOM, sets drafts or submits messages.
+- Android evaluates only fixed built-in scripts with a JSON-quoted text argument and current-page checks. The response `LEXICAL_INPUT_VERIFIED` is emitted **only** after a changed session draft is observed; ambiguous/cancelled results remain UNKNOWN, without retry.
+- Added `scripts/test_lexical_input.py` with fail-closed source anchors and no-bypass assertions. Guest JS syntax parsed successfully in V8; upstream Java patch locations each matched exactly once (static checks). Python unittest, javac/Gradle, APK installation and real-device text insertion have **not** been run yet.
+- Prepared Preview 007, not 006: `app.wishcode.harnessmobile.v05trial7`, versionCode `197`; keeps Preview 005 and its data installed side-by-side. The manual-only workflow applies patch after SHA-pinned customize and before Gradle, packages patch report. No GitHub Actions build was triggered.
+- Must test on device with an already-focused DSH composer: verify actual draft, Chinese+ASCII, existing draft insert, session switch, concurrent edits, loss of focus, inactive page; test other apps preserve Android accessibility. A successful compile is not a passing phone test.
+
+## Known uncertainty
+
+- The public DeepSeek Harness `InputActions` signature has been verified, but the pinned DSHA source ZIP may not match all details of the installed offline guest Node package; device and runtime tests are needed.
+- An invalid/unknown result must never be silently retried by changing channel or weakening STALE_FRAME checks.
