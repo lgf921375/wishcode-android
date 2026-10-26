@@ -67,9 +67,9 @@ class FlashCompatTests(unittest.TestCase):
 
     def test_rejects_missing_skill_dependency_injection(self):
         files, hashes = self.sample()
+        files["lib/index.js"] = b'export const inject = ["other"];\n'
+        hashes["lib/index.js"] = armor.git_blob_sha(files["lib/index.js"])
         with patch.dict(armor.SOURCE_BLOB_SHA, hashes, clear=True):
-            files["lib/index.js"] = b'export const inject = ["other"];\n'
-            hashes["lib/index.js"] = armor.git_blob_sha(files["lib/index.js"])
             with self.assertRaisesRegex(ValueError, "injection anchor drift"):
                 armor.patch_source(files)
 
