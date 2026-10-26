@@ -107,10 +107,15 @@ HELPER=r'''
         if (!current()) { fail(); return; }
         evaluate("(function(){var b=window.__wishcodeLexicalInput;return JSON.stringify("
                 + "b?b.insert(" + org.json.JSONObject.quote(value)
-                + "):{kind:'NO_BRIDGE'});})()", obj -> {
+                + "):(document.activeElement?.matches("
+                + "'[data-composer-input][contenteditable=\\\"true\\\"]')"
+                + "?{kind:'NO_BRIDGE_FOCUSED'}:{kind:'NOT_COMPOSER'}));})()", obj -> {
               String kind = obj.optString("kind");
-              if ("NO_BRIDGE".equals(kind) || "NOT_COMPOSER".equals(kind)) {
-                finish(null); // No draft mutation: keep original Accessibility behavior.
+              if ("NOT_COMPOSER".equals(kind)) {
+                finish(null); // Non-composer fields retain normal Accessibility input.
+              } else if ("NO_BRIDGE_FOCUSED".equals(kind)) {
+                finish(com.deepseekharness.app.screen.ScreenReply.refused(
+                    "LEXICAL_BRIDGE_NOT_READY"));
               } else if ("REJECTED".equals(kind)) {
                 finish(com.deepseekharness.app.screen.ScreenReply.refused("LEXICAL_INPUT_REJECTED"));
               } else if ("PENDING".equals(kind) && !obj.optString("id").isEmpty()) {
