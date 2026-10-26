@@ -30,6 +30,13 @@ vm.runInNewContext(source, {
 assert.equal(injected.length, 1);
 assert.match(injected[0].textContent, /max-height: min\(48dvh, 420px\)/);
 assert.match(injected[0].textContent, /ofm_root/);
+assert.match(injected[0].textContent, /data-plugin-settings/);
+assert.match(injected[0].textContent, /data-dsh-plugin-settings/);
+assert.match(injected[0].textContent, /@media \(max-width: 560px\)/);
+assert.match(injected[0].textContent, /grid-template-columns: minmax\(0, 1fr\)/);
+assert.match(injected[0].textContent, /overflow-x: auto/);
+assert.match(injected[0].textContent, /line-height: 1\.85/);
+assert.doesNotMatch(injected[0].textContent, /font-family:/);
 assert.doesNotMatch(source, /wishcode-local-artifact|previewCandidate|connectPreviewCards|MutationObserver/);
 assert.doesNotMatch(source, /fetch\(|XMLHttpRequest|localStorage/);
-console.log("PASS: retired preview, preserved ColorOS layout and model menu; no web requests");
+console.log("PASS: plugin settings responsive and ColorOS font preserved; no preview injection or web requests");
