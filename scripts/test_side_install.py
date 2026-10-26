@@ -17,7 +17,7 @@ class SideBySideInstallTests(unittest.TestCase):
         self.assertNotEqual(patch.APP_ID, "app.wishcode.harnessmobile.v05trial2")
         self.assertIn(f"versionCode {VERSION_CODE}", str(patch.EXPECTED["app/build.gradle"]))
         self.assertIn(VERSION_NAME, str(patch.EXPECTED["app/build.gradle"]))
-        self.assertIn("许愿编程·003", str(patch.EXPECTED["app/src/main/res/values/strings.xml"]))
+        self.assertIn("许愿编程·004", str(patch.EXPECTED["app/src/main/res/values/strings.xml"]))
 
     def test_workflow_verifies_new_package_before_upload(self):
         self.assertIn(f'test "$package" = "{APP_ID}"', WORKFLOW)
