@@ -44,7 +44,7 @@ EXPECTED = {
     ],
     "app/src/main/res/values/strings.xml": [
         ('<string name="app_name" translatable="false">DSHA</string>',
-         '<string name="app_name" translatable="false">许愿编程·004</string>'),
+         '<string name="app_name" translatable="false">许愿编程·005</string>'),
     ],
     "app/src/main/AndroidManifest.xml": [(MAIN_MANIFEST, NEW_MANIFEST)],
     "app/src/main/java/com/deepseekharness/app/core/ConfigStore.java": [
