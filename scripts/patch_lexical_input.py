@@ -164,8 +164,9 @@ CLIENT_HELPER=r'''
     };
     const bridge = {
       insert(value) {
-        if (!active || document.hidden || !focused() || typeof value !== 'string'
-            || !value || value.length > 2000) return {kind:'NOT_COMPOSER'};
+        if (!active || document.hidden || !focused()) return {kind:'NOT_COMPOSER'};
+        if (typeof value !== 'string' || !value || value.length > 2000)
+          return {kind:'REJECTED'};
         const target = current();
         const shell = target?.shell;
         if (!shell?.actions?.captureInsertion || !shell?.actions?.insertText)
