@@ -86,7 +86,7 @@
     '  :is([role="dialog"][aria-modal="true"], dialog[open], [data-sidebar-right-panel])',
     '    :is(form, fieldset, [role="form"]) :is(input, textarea, select) {',
     '    box-sizing: border-box; min-width: 0 !important; max-width: 100% !important;',
-    '    font-size: max(16px, 1rem); line-height: 1.65; vertical-align: middle;',
+    '    line-height: 1.65; vertical-align: middle;',
     '  }',
     '  :is([role="dialog"][aria-modal="true"], dialog[open], [data-sidebar-right-panel])',
     '    :is(form, fieldset, [role="form"]) :is(label, legend, small, p) {',
