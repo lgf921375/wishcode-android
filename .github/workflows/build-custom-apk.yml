@@ -1,4 +1,4 @@
-name: WishCode V0.5 Preview 003 NoGLM Android APK - Manual
+name: WishCode V0.5 Preview 004 ArmorCompat NoGLM Android APK - Manual
 on:
   workflow_dispatch:
 permissions:
@@ -109,7 +109,7 @@ jobs:
           print('Pinned source extracted:', src)
           PY
 
-      - name: Apply WishCode V0.5 Preview 003 mobile adaptation
+      - name: Apply WishCode V0.5 Preview 004 mobile adaptation
         env:
           SOURCE: ${{ steps.source.outputs.source }}
         run: |
@@ -117,6 +117,26 @@ jobs:
           python3 scripts/customize.py "$SOURCE" \
             --template scripts/WishCodeHomeActivity.java \
             --report "$SOURCE/wishcode-patch-report.json"
+
+      - name: Build pinned opt-in Flash skill compatibility archive
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fixed plugin git commit; all critical blob SHA-1 values checked.
+          commit="636059f8002b060fb4dca1c1b47c02e1ef2a2f31"
+          curl --fail --silent --show-error --location --retry 2 --max-time 90 \
+            "https://api.github.com/repos/jadezane6634-ops/dsh-purge-flash/tarball/$commit" \
+            -o "$RUNNER_TEMP/dsh-purge-flash-upstream.tar.gz"
+          archive="$SOURCE/app/src/main/assets/wishcode/dsh-purge-flash-v1.4.0-compat.tgz"
+          python3 scripts/prepare_purge_flash.py \
+            "$RUNNER_TEMP/dsh-purge-flash-upstream.tar.gz" "$archive" \
+            --report "$SOURCE/armor-compat-report.json"
+          mkdir -p "$RUNNER_TEMP/armor-validation"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/armor-validation"
+          node --check "$RUNNER_TEMP/armor-validation/package/lib/skills.js"
+          test -s "$SOURCE/armor-compat-report.json"
 
       - name: Resolve tool versions from exact upstream source
         id: toolchain
@@ -183,31 +203,36 @@ jobs:
           fi
           apk=$(find "$SOURCE/app/build/outputs/apk" \
              -path '*/standard/debug/*' -name '*.apk' -type f | head -1)
-          cp "$apk" dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk
+          cp "$apk" dist/WishCode-v0.5-preview-004-armorcompat-no-glm-arm64-debug.apk
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify \
-             --verbose --print-certs dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk | tee dist/signature-report.txt
+             --verbose --print-certs dist/WishCode-v0.5-preview-004-armorcompat-no-glm-arm64-debug.apk | tee dist/signature-report.txt
           badging=$("$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging \
-             dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk)
+             dist/WishCode-v0.5-preview-004-armorcompat-no-glm-arm64-debug.apk)
           package=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
           version_code=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: .*versionCode='\([^']*\)'.*/\1/p" | head -1)
           version_name=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: .*versionName='\([^']*\)'.*/\1/p" | head -1)
-          test "$package" = "app.wishcode.harnessmobile.v05trial3"
-          test "$version_code" = "193"
-          test "$version_name" = "0.5-preview-003-dsh0.2.1-rc.2"
+          test "$package" = "app.wishcode.harnessmobile.v05trial4"
+          test "$version_code" = "194"
+          test "$version_name" = "0.5-preview-004-armorcompat-dsh0.2.1-rc.2"
           printf 'Verified package=%s versionCode=%s versionName=%s\n' \
              "$package" "$version_code" "$version_name" | tee dist/package-version-report.txt
-          unzip -t dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk >/dev/null
-          sha256sum dist/WishCode-v0.5-preview-003-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
+          unzip -t dist/WishCode-v0.5-preview-004-armorcompat-no-glm-arm64-debug.apk >/dev/null
+          sha256sum dist/WishCode-v0.5-preview-004-armorcompat-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
+          cp "$SOURCE/armor-compat-report.json" dist/armor-compat-report.json
+          cp "$SOURCE/app/src/main/assets/wishcode/dsh-purge-flash-v1.4.0-compat.tgz" \
+            dist/dsh-purge-flash-v1.4.0-wishcode-compat.tgz
+          sha256sum dist/dsh-purge-flash-v1.4.0-wishcode-compat.tgz \
+            > dist/ARMOR-COMPAT-SHA256.txt
           git rev-parse HEAD > dist/source-commit.txt
 
       - name: Upload verified, signed test APK
         uses: actions/upload-artifact@v4
         with:
-          name: WishCode-V0.5-Preview-003-NoGLM-Android-APK
+          name: WishCode-V0.5-Preview-004-ArmorCompat-Android-APK
           path: dist/
           if-no-files-found: error
           retention-days: 7
