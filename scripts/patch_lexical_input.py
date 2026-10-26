@@ -75,7 +75,8 @@ HELPER=r'''
         if (done.getCount() != 0) { answer.set(response); done.countDown(); }
       }
       boolean current() {
-        return grant.current() && wishcodeTypingOwner.get() == owner
+        return done.getCount() != 0 && grant.current()
+            && wishcodeTypingOwner.get() == owner
             && owner.wishcodeTypingCurrent();
       }
       void fail() { finish(wishcodeAnswer("LEXICAL_INPUT_RESULT_UNKNOWN", false)); }
