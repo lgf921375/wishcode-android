@@ -30,6 +30,7 @@ class FlashCompatTests(unittest.TestCase):
         }).encode()
         files = {
             "lib/skills.js": skills,
+            "lib/index.js": b'export const inject = ["systemPrompt"];\n',
             "package.json": package,
             "cordis.patch.yml": b"- insert: []\n",
             "skill/armor-playbook.md": b"# armor-playbook\n",
@@ -43,6 +44,7 @@ class FlashCompatTests(unittest.TestCase):
             result = armor.patch_source(files)
         self.assertIn(b'source: "runtime"', files["lib/skills.js"])
         self.assertEqual(files["lib/skills.js"].count(armor.REPLACEMENT), 1)
+        self.assertIn(armor.INJECT_REPLACEMENT, files["lib/index.js"])
         self.assertFalse(result["auto_installed"])
         self.assertFalse(result["auto_enabled"])
         with tempfile.TemporaryDirectory() as folder:
@@ -53,12 +55,22 @@ class FlashCompatTests(unittest.TestCase):
                 self.assertIn("package/package.json", archive.getnames())
                 patched = archive.extractfile("package/lib/skills.js").read()
                 self.assertIn(b'source: "runtime"', patched)
+                patched_index = archive.extractfile("package/lib/index.js").read()
+                self.assertIn(armor.INJECT_REPLACEMENT, patched_index)
 
     def test_rejects_unexpected_upstream_bytes(self):
         files, hashes = self.sample()
         with patch.dict(armor.SOURCE_BLOB_SHA, hashes, clear=True):
             files["lib/skills.js"] = files["lib/skills.js"].replace(b"armor-playbook", b"other-playbook")
             with self.assertRaisesRegex(ValueError, "blob SHA mismatch"):
+                armor.patch_source(files)
+
+    def test_rejects_missing_skill_dependency_injection(self):
+        files, hashes = self.sample()
+        with patch.dict(armor.SOURCE_BLOB_SHA, hashes, clear=True):
+            files["lib/index.js"] = b'export const inject = ["other"];\n'
+            hashes["lib/index.js"] = armor.git_blob_sha(files["lib/index.js"])
+            with self.assertRaisesRegex(ValueError, "injection anchor drift"):
                 armor.patch_source(files)
 
     def test_rejects_unsafe_symlink(self):
