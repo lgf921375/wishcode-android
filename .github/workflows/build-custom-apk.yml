@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_*.py' -v
-          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py scripts/prepare_purge_flash.py scripts/prepare_dnf_dev.py scripts/register_wishcode_assets.py
+          python3 -m py_compile scripts/customize.py scripts/release_config.py scripts/pin_linux_aapt2.py scripts/prepare_purge_flash.py scripts/prepare_dnf_dev.py scripts/register_wishcode_assets.py scripts/patch_lexical_input.py
 
       - name: Set up Node 24
         uses: actions/setup-node@v4
@@ -117,6 +117,19 @@ jobs:
           python3 scripts/customize.py "$SOURCE" \
             --template scripts/WishCodeHomeActivity.java \
             --report "$SOURCE/wishcode-patch-report.json"
+
+      - name: Patch the authorized focused Lexical composer input
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        run: |
+          set -euo pipefail
+          python3 scripts/patch_lexical_input.py "$SOURCE" \
+            --report "$SOURCE/wishcode-lexical-input-report.json"
+          test -s "$SOURCE/wishcode-lexical-input-report.json"
+          grep -Fq 'LEXICAL_INPUT_VERIFIED' \
+            "$SOURCE/app/src/main/java/com/deepseekharness/app/ui/WebPreviewActivity.java"
+          grep -Fq "shell.actions.insertText(value, span)" \
+            "$SOURCE/app/src/main/assets/app-integration/client.js"
 
       - name: Build pinned opt-in Flash skill compatibility archive
         env:
@@ -316,6 +329,7 @@ jobs:
           unzip -t dist/WishCode-v0.5-preview-007-lexicalinput-no-glm-arm64-debug.apk >/dev/null
           sha256sum dist/WishCode-v0.5-preview-007-lexicalinput-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
+          cp "$SOURCE/wishcode-lexical-input-report.json" dist/lexical-input-report.json
           cp "$SOURCE/armor-compat-report.json" dist/armor-compat-report.json
           cp "$SOURCE/dnf-dev-report.json" dist/dnf-dev-report.json
           cp "$SOURCE/wishcode-asset-registration.json" dist/asset-registration-report.json
