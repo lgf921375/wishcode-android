@@ -46,11 +46,11 @@ class ReleaseIntegrityTests(unittest.TestCase):
 
     def test_signed_debug_app_is_separate_from_previous_install(self):
         self.assertNotEqual(release.APP_ID, "app.wishcode.harnessmobile.v05trial2")
-        self.assertIn("v05trial5", release.APP_ID)
-        self.assertIn("许愿编程·005", str(
+        self.assertIn("v05trial7", release.APP_ID)
+        self.assertIn("许愿编程·007", str(
             patch.EXPECTED["app/src/main/res/values/strings.xml"]))
-        self.assertIn("V0.5 测试版005", home)
-        self.assertIn("Preview 005", workflow)
+        self.assertIn("V0.5 测试版007", home)
+        self.assertIn("Preview 007", workflow)
 
     def test_retired_browser_not_packaged_or_replaced(self):
         manifest = patch.NEW_MANIFEST
