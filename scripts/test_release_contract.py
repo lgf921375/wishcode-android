@@ -50,7 +50,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertIn("许愿编程·006", str(
             patch.EXPECTED["app/src/main/res/values/strings.xml"]))
         self.assertIn("V0.5 测试版006", home)
-        self.assertIn("Preview 005", workflow)
+        self.assertIn("Preview 006", workflow)
 
     def test_retired_browser_not_packaged_or_replaced(self):
         manifest = patch.NEW_MANIFEST
