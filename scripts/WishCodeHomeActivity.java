@@ -32,6 +32,8 @@ import com.deepseekharness.app.R;
 public final class WishCodeHomeActivity extends AppCompatActivity {
   private static final String ARMOR_ARCHIVE_ASSET = "wishcode/dsh-purge-flash-v1.4.0-compat.tgz";
   private static final String ARMOR_ARCHIVE_FILE = "dsh-purge-flash-v1.4.0-wishcode-compat.tgz";
+  private static final String DNF_ARCHIVE_ASSET = "wishcode/dsh-wishcode-dnf-dev-0.1.0.tgz";
+  private static final String DNF_ARCHIVE_FILE = "dsh-wishcode-dnf-dev-0.1.0.tgz";
 
   // User-controlled export, no automatic installation or profile edits.
   private final ActivityResultLauncher<String> exportArmorArchive =
@@ -52,6 +54,27 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
                   Toast.LENGTH_LONG).show();
             }
           });
+  // Export is explicitly user-triggered. Neither archive modifies DSH profiles
+  // without a separate confirmation in the native plugin manager.
+  private final ActivityResultLauncher<String> exportDnfArchive =
+      registerForActivityResult(
+          new ActivityResultContracts.CreateDocument("application/gzip"), uri -> {
+            if (uri == null) return;
+            try (InputStream in = getAssets().open(DNF_ARCHIVE_ASSET);
+                 OutputStream out = getContentResolver().openOutputStream(uri, "w")) {
+              if (out == null) throw new java.io.IOException("no output stream");
+              byte[] buf = new byte[16384];
+              int count;
+              while ((count = in.read(buf)) != -1) out.write(buf, 0, count);
+              out.flush();
+              Toast.makeText(this, "DNF 开发工具包已保存。进入插件管理导入 TAR.GZ 并确认启用。",
+                  Toast.LENGTH_LONG).show();
+            } catch (Exception error) {
+              Toast.makeText(this, "导出失败：" + error.getClass().getSimpleName(),
+                  Toast.LENGTH_LONG).show();
+            }
+          });
+
   // Reviewed exact GitHub release artifact; never install the unrelated npm namesake.
   private static final String FREE_MODEL_URL =
       "https://github.com/Ebony-Vinyl/dsh-our-free-model/releases/download/v2.5.9/dsh-our-free-model-2.5.9.tgz";
@@ -151,7 +174,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     scroll.addView(content);
     setContentView(scroll);
 
-    addText(content, text("许愿编程 · V0.5 测试版004", 26, R.color.text, true), 0, 3);
+    addText(content, text("许愿编程 · V0.5 测试版005", 26, R.color.text, true), 0, 3);
     addText(content, text("像聊天一样编程 · 工具调用仍由 DSH 执行", 13,
         R.color.text_secondary, false), 0, 18);
 
@@ -168,6 +191,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     action(content, "项目文件", false,
         () -> startActivity(new Intent(this, WorkspaceFilesActivity.class)));
     action(content, "GitHub 搜索与源码研究", false, this::showGitHubHelp);
+    action(content, "DNF 手游开发工具包 · 三项按需技能", false, this::showDnfDevToolkit);
     action(content, "Flash 破甲插件 · 修复包（手动导入）", false, this::showArmorCompat);
     action(content, "插件管理", false, this::openPlugins);
     action(content, "终端命令", false, this::openTerminal);
@@ -302,6 +326,26 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
             exportArmorArchive.launch(ARMOR_ARCHIVE_FILE))
         .setNeutralButton("插件管理", (dialog, which) -> openPlugins())
         .setNegativeButton("取消", null)
+        .show();
+  }
+
+  private void showDnfDevToolkit() {
+    new AlertDialog.Builder(this)
+        .setTitle("DNF 风格手游专业开发工具")
+        .setMessage("此工具包包含 3 项按需加载的 DSH Skill：\n"
+            + "① Unity 战斗：普攻连击、HitEvent、Hitstop、浮空、倒地和扫地。\n"
+            + "② 动画素材：原创角色、图集、动画锚点、碰撞盒与来源记录。\n"
+            + "③ 安卓验收：Unity 版本、场景、横屏、双指触控、编译日志和 APK。\n\n"
+            + "技能仅在选择后加载正文，不预装第三方游戏素材，不自带 Unity 编辑器。"
+            + "现有 DSH 文件读写、Git、终端和项目测试工具继续使用。"
+            + "第三方 GitHub 搜索插件可从本页的“GitHub 搜索”入口另行检查安装。\n\n"
+            + "导出 TAR.GZ 后，到“插件管理”选择文件，检查插件名称"
+            + " dsh-wishcode-dnf-dev / 版本 0.1.0 并确认。"
+            + "不会自动更改 main、自动构建或越过工作区权限。")
+        .setPositiveButton("导出 DNF 开发插件", (dialog, which) ->
+            exportDnfArchive.launch(DNF_ARCHIVE_FILE))
+        .setNeutralButton("GitHub 源码插件", (dialog, which) -> showGitHubHelp())
+        .setNegativeButton("返回", null)
         .show();
   }
 
