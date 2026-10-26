@@ -163,6 +163,46 @@ jobs:
           )
           test -s "$SOURCE/armor-compat-report.json"
 
+      - name: Package and smoke-test opt-in DNF development skills
+        env:
+          SOURCE: ${{ steps.source.outputs.source }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$SOURCE/app/src/main/assets/wishcode/dsh-wishcode-dnf-dev-0.1.0.tgz"
+          python3 scripts/prepare_dnf_dev.py "$archive" | tee "$SOURCE/dnf-dev-report.json"
+          mkdir -p "$RUNNER_TEMP/dnf-plugin"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/dnf-plugin"
+          node --check "$RUNNER_TEMP/dnf-plugin/package/lib/index.js"
+          (
+            cd "$RUNNER_TEMP/dnf-plugin/package"
+            node --input-type=module <<'JS'
+          import { apply } from "./lib/index.js";
+          const skills = [];
+          const ctx = {
+            get(name) {
+              if (name !== "skills") throw new Error("unexpected service: " + name);
+              return { register(skill) {
+                if (skill.source !== "runtime" || typeof skill.content !== "string" ||
+                    skill.content.length < 100 || skill.invocation?.modelInvocable !== true) {
+                  throw new Error("invalid skill runtime contract");
+                }
+                skills.push(skill.name);
+                return () => {};
+              }};
+            },
+            effect(handler) { if (typeof handler() !== "function") throw new Error("invalid disposer"); }
+          };
+          apply(ctx, { enabled: true });
+          if (skills.join(",") !==
+              "wishcode-dnf-combat,wishcode-dnf-art,wishcode-dnf-release") {
+            throw new Error("missing professional development skills");
+          }
+          console.log("PASS all 3 original DNF development skills register");
+          JS
+          )
+          test -s "$SOURCE/dnf-dev-report.json"
+
       - name: Resolve tool versions from exact upstream source
         id: toolchain
         env:
@@ -240,7 +280,7 @@ jobs:
           version_name=$(printf '%s\n' "$badging" | sed -n \
              "s/^package: .*versionName='\([^']*\)'.*/\1/p" | head -1)
           test "$package" = "app.wishcode.harnessmobile.v05trial5"
-          test "$version_code" = "194"
+          test "$version_code" = "195"
           test "$version_name" = "0.5-preview-005-mobileplugins-dsh0.2.1-rc.2"
           printf 'Verified package=%s versionCode=%s versionName=%s\n' \
              "$package" "$version_code" "$version_name" | tee dist/package-version-report.txt
@@ -248,6 +288,11 @@ jobs:
           sha256sum dist/WishCode-v0.5-preview-005-mobileplugins-no-glm-arm64-debug.apk > dist/SHA256SUMS.txt
           cp "$SOURCE/wishcode-patch-report.json" dist/patch-report.json
           cp "$SOURCE/armor-compat-report.json" dist/armor-compat-report.json
+          cp "$SOURCE/dnf-dev-report.json" dist/dnf-dev-report.json
+          cp "$SOURCE/app/src/main/assets/wishcode/dsh-wishcode-dnf-dev-0.1.0.tgz" \
+            dist/dsh-wishcode-dnf-dev-0.1.0.tgz
+          sha256sum dist/dsh-wishcode-dnf-dev-0.1.0.tgz \
+            > dist/DNF-DEV-SHA256.txt
           cp "$SOURCE/app/src/main/assets/wishcode/dsh-purge-flash-v1.4.0-compat.tgz" \
             dist/dsh-purge-flash-v1.4.0-wishcode-compat.tgz
           sha256sum dist/dsh-purge-flash-v1.4.0-wishcode-compat.tgz \
