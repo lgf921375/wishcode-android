@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import java.io.InputStream;
+import java.io.OutputStream;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -14,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -26,6 +30,28 @@ import com.deepseekharness.app.R;
  * Model credentials are managed by upstream DSH settings, not this launcher.
  */
 public final class WishCodeHomeActivity extends AppCompatActivity {
+  private static final String ARMOR_ARCHIVE_ASSET = "wishcode/dsh-purge-flash-v1.4.0-compat.tgz";
+  private static final String ARMOR_ARCHIVE_FILE = "dsh-purge-flash-v1.4.0-wishcode-compat.tgz";
+
+  // User-controlled export, no automatic installation or profile edits.
+  private final ActivityResultLauncher<String> exportArmorArchive =
+      registerForActivityResult(
+          new ActivityResultContracts.CreateDocument("application/gzip"), uri -> {
+            if (uri == null) return;
+            try (InputStream in = getAssets().open(ARMOR_ARCHIVE_ASSET);
+                 OutputStream out = getContentResolver().openOutputStream(uri, "w")) {
+              if (out == null) throw new java.io.IOException("no output stream");
+              byte[] buf = new byte[16384];
+              int count;
+              while ((count = in.read(buf)) != -1) out.write(buf, 0, count);
+              out.flush();
+              Toast.makeText(this, "兼容包已保存。进入插件管理 → 导入 ZIP/TAR.GZ，确认启用。",
+                  Toast.LENGTH_LONG).show();
+            } catch (Exception error) {
+              Toast.makeText(this, "导出失败：" + error.getClass().getSimpleName(),
+                  Toast.LENGTH_LONG).show();
+            }
+          });
   // Reviewed exact GitHub release artifact; never install the unrelated npm namesake.
   private static final String FREE_MODEL_URL =
       "https://github.com/Ebony-Vinyl/dsh-our-free-model/releases/download/v2.5.9/dsh-our-free-model-2.5.9.tgz";
@@ -125,7 +151,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     scroll.addView(content);
     setContentView(scroll);
 
-    addText(content, text("许愿编程 · V0.5 测试版003", 26, R.color.text, true), 0, 3);
+    addText(content, text("许愿编程 · V0.5 测试版004", 26, R.color.text, true), 0, 3);
     addText(content, text("像聊天一样编程 · 工具调用仍由 DSH 执行", 13,
         R.color.text_secondary, false), 0, 18);
 
@@ -142,6 +168,7 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
     action(content, "项目文件", false,
         () -> startActivity(new Intent(this, WorkspaceFilesActivity.class)));
     action(content, "GitHub 搜索与源码研究", false, this::showGitHubHelp);
+    action(content, "Flash 破甲插件 · 修复包（手动导入）", false, this::showArmorCompat);
     action(content, "插件管理", false, this::openPlugins);
     action(content, "终端命令", false, this::openTerminal);
 
@@ -256,6 +283,26 @@ public final class WishCodeHomeActivity extends AppCompatActivity {
         .appendQueryParameter("version", "0.1.6")
         .build();
     startActivity(new Intent(this, PluginInstallActivity.class).setData(uri));
+  }
+
+  private void showArmorCompat() {
+    new AlertDialog.Builder(this)
+        .setTitle("dsh-purge-flash 1.4.0 兼容包")
+        .setMessage("来源固定：jadezane6634-ops/dsh-purge-flash，提交 "
+            + "636059f8002b060fb4dca1c1b47c02e1ef2a2f31。\n\n"
+            + "只修正 armor-playbook 技能注册缺少字符串 source 字段的问题；"
+            + "不改 DSH 宿主、不改其他第三方插件。\n\n"
+            + "插件会修改提示词及请求处理，并可能记录原始会话内容。"
+            + "建议先备份工作区，仅在测试会话使用。"
+            + "此修复尚未通过安卓实机验证，也不会自动安装或启用。\n\n"
+            + "点击「导出兼容包」保存到手机下载目录，随后打开「插件管理」"
+            + "选择「导入 ZIP/TAR.GZ」，检查名称和版本再确认安装。"
+            + "安装后务必使用真正的 /armor status 命令验证模块状态。")
+        .setPositiveButton("导出兼容包", (dialog, which) ->
+            exportArmorArchive.launch(ARMOR_ARCHIVE_FILE))
+        .setNeutralButton("插件管理", (dialog, which) -> openPlugins())
+        .setNegativeButton("取消", null)
+        .show();
   }
 
   private void showPermissions() {
