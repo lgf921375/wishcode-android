@@ -20,11 +20,14 @@ UPSTREAM_REPO = "jadezane6634-ops/dsh-purge-flash"
 UPSTREAM_VERSION = "1.4.0"
 SOURCE_BLOB_SHA = {
     "lib/skills.js": "5138d8d067c81a49abe431fd9489cc7d4b357eb0",
+    "lib/index.js": "26e5b04c41f652185d970d847f0b7b8cfdd19674",
     "package.json": "616861cf8777a758fcc2a9fb4083a218879cc164",
     "cordis.patch.yml": "8a00b5154b9954bf884b928068c36107a04e1aa7",
 }
 ANCHOR = b'      name: "armor-playbook",\n      description: DESCRIPTION,\n'
 REPLACEMENT = b'      name: "armor-playbook",\n      description: DESCRIPTION,\n      source: "runtime",\n'
+INJECT_ANCHOR = b'export const inject = ["systemPrompt"];'
+INJECT_REPLACEMENT = b'export const inject = ["systemPrompt", "skills"];'
 MAX_TOTAL_BYTES = 16 * 1024 * 1024
 MAX_FILES = 200
 
@@ -96,17 +99,22 @@ def patch_source(files: dict[str, bytes]) -> dict:
     if fixed.count(REPLACEMENT) != 1:
         raise ValueError("compatibility patch failed")
     files["lib/skills.js"] = fixed
+    index = files["lib/index.js"]
+    if index.count(INJECT_ANCHOR) != 1:
+        raise ValueError("flash plugin injection anchor drift")
+    files["lib/index.js"] = index.replace(INJECT_ANCHOR, INJECT_REPLACEMENT, 1)
     return {
         "project": "WishCode Android",
         "upstream": UPSTREAM_REPO,
         "upstream_commit": UPSTREAM_COMMIT,
         "upstream_version": UPSTREAM_VERSION,
-        "patch": "armor-playbook runtime skill source:string",
+        "patch": "armor-playbook runtime source:string and required skills injection",
         "target": "DSH 0.2.1-rc.2",
         "auto_installed": False,
         "auto_enabled": False,
         "verified_on_android": False,
         "patched_file_sha256": hashlib.sha256(fixed).hexdigest(),
+        "patched_index_sha256": hashlib.sha256(files["lib/index.js"]).hexdigest(),
     }
 
 
